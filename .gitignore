@@ -1,0 +1,13 @@
+node_modules
+dist
+.DS_Store
+package-lock.json
+node-spec.json
+*.blend1
+node-spec.csv
+yarn-error.log
+# hardhat things
+cache
+artifacts
+typechain-types
+.env
