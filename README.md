@@ -1,5 +1,12 @@
-# Behavior-Graph
+# interX
 
-This respository is created as a fork from Ben Houston's [behave-graph](https://github.com/bhouston/behave-graph), and incorporates code from [behave-flow](https://github.com/beeglebug/behave-flow) for the user interface.  It takes the existing functionality, and enables a scene to be edited side by side with the node-based editor, and allows the scene graphs to be stores on IPFS and evm compatible blockchains.
+This respository is created as a fork from Ben Houston's [behave-graph](https://github.com/bhouston/behave-graph), and incorporates code from [behave-flow](https://github.com/beeglebug/behave-flow) for the user interface. It takes the existing functionality, and enables a scene to be edited side by side with the node-based editor, and allows the scene graphs to be stores on IPFS and evm compatible blockchains.
 
 This was made for the [EthGlobal EthSf hackathon](https://sf.ethglobal.com/)
+
+## Useful code
+
+- [Behavior Graph smart contract](/contracts/BehaviorGraph.sol), with token gated actions
+- [Behavior Graph smart contract unit tests](/test/BehaviorGraph.ts)
+- [Scene Modification code from the Behavior Graph](/editor/src/scene/useSceneModifier.ts)
+- [Hook to mint the behavior graph and actions into the smart contract](/editor/src/hooks/useInteractiveWorldMinter.ts)
