@@ -1,49 +1,11 @@
 {
   "nodes": [
     {
-      "id": "c6521a31-c4ff-4978-b3ce-c0893d020196",
-      "type": "math/equal/integer",
-      "metadata": {
-        "positionX": "59.10035025364091",
-        "positionY": "-143.82928501958486"
-      },
-      "parameters": {
-        "b": {
-          "value": "1"
-        },
-        "a": {
-          "link": {
-            "nodeId": "6c2eb241-54b0-45db-8f7c-d775c511a33d",
-            "socket": "result"
-          }
-        }
-      }
-    },
-    {
-      "id": "6c2eb241-54b0-45db-8f7c-d775c511a33d",
-      "type": "math/modulus/integer",
-      "metadata": {
-        "positionX": "-120.49652372405816",
-        "positionY": "-143.82928501958486"
-      },
-      "parameters": {
-        "b": {
-          "value": "2"
-        },
-        "a": {
-          "link": {
-            "nodeId": "c5ca3660-a2d7-401b-8739-e8bdd7329148",
-            "socket": "count"
-          }
-        }
-      }
-    },
-    {
       "id": "6effc2ef-5228-415f-9614-60eeb5100216",
       "type": "scene/set/boolean",
       "metadata": {
-        "positionX": "271.304557784485",
-        "positionY": "-364.18962246841056"
+        "positionX": "278.6686844450226",
+        "positionY": "-314.1135611767546"
       },
       "parameters": {
         "jsonPath": {
@@ -51,18 +13,26 @@
         },
         "value": {
           "link": {
-            "nodeId": "c6521a31-c4ff-4978-b3ce-c0893d020196",
-            "socket": "result"
+            "nodeId": "d54414df-4da7-48e1-ba91-2a04b9584c71",
+            "socket": "isOn"
           }
         }
+      }
+    },
+    {
+      "id": "d54414df-4da7-48e1-ba91-2a04b9584c71",
+      "type": "flow/flipFlop",
+      "metadata": {
+        "positionX": "48.7843418772044",
+        "positionY": "-526.1039396020275"
       }
     },
     {
       "id": "c5ca3660-a2d7-401b-8739-e8bdd7329148",
       "type": "scene/nodeClick",
       "metadata": {
-        "positionX": "-739.611162286863",
-        "positionY": "-386.7378644565865"
+        "positionX": "-612.4513318063024",
+        "positionY": "-270.0654426754536"
       },
       "parameters": {
         "jsonPath": {
@@ -79,6 +49,81 @@
         "secondFlow": {
           "nodeId": "6effc2ef-5228-415f-9614-60eeb5100216",
           "socket": "flow"
+        },
+        "flow": {
+          "nodeId": "d54414df-4da7-48e1-ba91-2a04b9584c71",
+          "socket": "flow"
+        }
+      }
+    },
+    {
+      "id": "0",
+      "type": "lifecycle/onTick",
+      "metadata": {
+        "positionX": "-579",
+        "positionY": "0"
+      },
+      "flows": {
+        "flow": {
+          "nodeId": "3",
+          "socket": "flow"
+        }
+      }
+    },
+    {
+      "id": "1",
+      "type": "math/create/euler",
+      "metadata": {
+        "positionX": "-400",
+        "positionY": "100"
+      },
+      "parameters": {
+        "y": {
+          "value": 0
+        },
+        "z": {
+          "value": 0
+        },
+        "x": {
+          "link": {
+            "nodeId": "0",
+            "socket": "time"
+          }
+        }
+      }
+    },
+    {
+      "id": "2",
+      "type": "math/toQuat/euler",
+      "metadata": {
+        "positionX": "-200",
+        "positionY": "100"
+      },
+      "parameters": {
+        "a": {
+          "link": {
+            "nodeId": "1",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "3",
+      "type": "scene/set/quat",
+      "metadata": {
+        "positionX": "0",
+        "positionY": "0"
+      },
+      "parameters": {
+        "jsonPath": {
+          "value": "nodes/Suzanne/rotation"
+        },
+        "value": {
+          "link": {
+            "nodeId": "2",
+            "socket": "result"
+          }
         }
       }
     }
