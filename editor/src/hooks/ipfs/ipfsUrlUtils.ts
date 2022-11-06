@@ -20,5 +20,5 @@ export function convertURIToHTTPS(url: string | undefined) {
 export function ipfsUrlToCid(url: string) {
   const lastSlash = url.lastIndexOf('/');
 
-  return url.substring(lastSlash, url.length);
+  return url.substring(lastSlash + 1, url.length);
 }

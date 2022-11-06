@@ -1,7 +1,7 @@
 import { ObjectMap } from '@react-three/fiber';
 import { IScene, Vec3, Vec4, Properties, ResourceProperties } from '@behavior-graph/framework';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { Object3D, Quaternion, Vector3, Vector4 } from 'three';
+import { Color, Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 
 function toVec3(value: Vector3): Vec3 {
@@ -13,7 +13,7 @@ function toVec4(value: Vector4 | Quaternion): Vec4 {
 
 const shortPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)$/;
 const jsonPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)\/(?<property>[^/]+)$/;
-export type ResourceTypes = 'nodes' | 'animations';
+export type ResourceTypes = 'nodes' | 'materials';
 export type Path = {
   resource: ResourceTypes;
   name: string;
@@ -43,7 +43,19 @@ function applyPropertyToModel({ resource, name, property }: Path, gltf: GLTF & O
       return;
     }
 
-    applyModifier(property, node, value);
+    applyNodeModifier(property, node, value);
+
+    return;
+  }
+  if (resource === 'materials') {
+    const node = gltf.materials[name];
+
+    if (!node) {
+      console.error(`no node at path ${name}`);
+      return;
+    }
+
+    applyMaterialModifier(property, node, value);
 
     return;
   }
@@ -66,7 +78,7 @@ function getPropertyFromModel({ resource, name, property }: Path, gltf: GLTF & O
   }
 }
 
-function applyModifier(property: string, objectRef: Object3D, value: any) {
+function applyNodeModifier(property: string, objectRef: Object3D, value: any) {
   switch (property) {
     case 'visible': {
       objectRef.visible = value as boolean;
@@ -85,6 +97,21 @@ function applyModifier(property: string, objectRef: Object3D, value: any) {
     case 'rotation': {
       const v = value as Vec4;
       objectRef.quaternion.set(v.x, v.y, v.z, v.w);
+      break;
+    }
+  }
+}
+
+function applyMaterialModifier(property: string, materialRef: Material, value: any) {
+  switch (property) {
+    case 'color': {
+      const basic = materialRef as MeshBasicMaterial;
+
+      if (basic.color) {
+        const v = value as Vec3;
+        basic.color.setRGB(v.x, v.y, v.z);
+        basic.needsUpdate = true;
+      }
       break;
     }
   }
@@ -148,12 +175,15 @@ const buildSceneModifier = (
   };
 
   const getProperties = (): Properties => {
-    const nodeProperties = ['visible', 'translation', 'scale', 'rotation'];
+    const nodeProperties = ['visible', 'translation', 'scale', 'rotation', 'color'];
+    const materialProperties = ['color'];
 
-    const nodeNames = Object.entries(gltf.nodes).map(([name, element]) => name);
+    const nodeNames = Object.entries(gltf.nodes).map(([name]) => name);
+    const materialNames = Object.entries(gltf.materials).map(([name]) => name);
 
     const properties: Properties = {
       nodes: { names: nodeNames, properties: nodeProperties },
+      materials: { names: materialNames, properties: materialProperties },
     };
 
     return properties;
