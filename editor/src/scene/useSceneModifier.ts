@@ -13,7 +13,7 @@ function toVec4(value: Vector4 | Quaternion): Vec4 {
 
 const shortPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)$/;
 const jsonPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)\/(?<property>[^/]+)$/;
-export type ResourceTypes = 'nodes';
+export type ResourceTypes = 'nodes' | 'animations';
 export type Path = {
   resource: ResourceTypes;
   name: string;

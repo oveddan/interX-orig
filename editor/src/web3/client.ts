@@ -31,6 +31,8 @@ const getAllowedChains = () =>
 
     if (chainName === 'skale') return buildSkaleChain();
 
+    if (chainName === 'mumbai') return chain.polygonMumbai;
+
     const foundChain = Object.values(chain).find((x) => x.name === chainName);
 
     if (!foundChain) throw new Error(`could not find chain with name ${chainName}`);
