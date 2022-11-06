@@ -32,8 +32,6 @@ const MintToChainButton = ({
     listener(tokenId, to, uri, nodes) {
       // hack - if this was minted with the proper cid, we can assume this was the token.
       if (uri === cid) {
-        console.log('minted token id', tokenId);
-
         setMintedTokenId(tokenId.toNumber());
       }
     },

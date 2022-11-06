@@ -58,8 +58,6 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
       const transaction = await connectedContract.executeAction(BigNumber.from(tokenId), actionId);
 
       await transaction.wait();
-
-      console.log('done');
     },
     [tokenId]
   );

@@ -41,8 +41,6 @@ export const useRegistry = ({
     registerSceneProfile(registry, lifecyleEmitter, scene, smartContractActions);
     const specJson = getNodeSpecJSON(registry);
 
-    console.log({ specJson });
-
     setRegistry(registry);
     setSpecJson(specJson);
   }, [scene]);

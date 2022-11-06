@@ -2,7 +2,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import FlowEditor from './flowEditor/FlowEditorApp';
 import { buildGraphEvaluator, useRegistry } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
-import rawGraphJSON from './exampleGraphs/SpinningSuzanne.json';
+import rawGraphJSON from './exampleGraphs/ClickToAnimate.json';
 import { GraphEvaluator, GraphJSON } from '@behavior-graph/framework';
 import { behaveToFlow } from './flowEditor/transformers/behaveToFlow';
 import { useEdgesState, useNodesState } from 'reactflow';

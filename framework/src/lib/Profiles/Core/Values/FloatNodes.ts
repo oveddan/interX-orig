@@ -40,7 +40,6 @@ export const Multiply = new NodeDescription(
   '×',
   (description, graph) =>
     new In2Out1FuncNode(description, graph, ['float', 'float'], 'float', (a: number, b: number) => {
-      console.log({ a, b });
       a * b;
     })
 );

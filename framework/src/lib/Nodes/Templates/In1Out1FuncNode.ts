@@ -27,10 +27,6 @@ export class In1Out1FuncNode<In1, Out1> extends Node {
       (context: NodeEvalContext) => {
         const result = this.unaryEvalFunc(context.readInput(inputNames[0]));
 
-        console.log({
-          input: context.readInput(inputNames[0]),
-          result,
-        });
         context.writeOutput('result', result);
       }
     );

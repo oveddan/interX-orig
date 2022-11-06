@@ -144,8 +144,6 @@ const buildSceneModifier = (
   const setProperty = (jsonPath: string, valueTypeName: string, value: any) => {
     const path = parseJsonPath(jsonPath);
 
-    console.log('set', { jsonPath, value });
-
     applyPropertyToModel(path, gltf, value);
   };
 

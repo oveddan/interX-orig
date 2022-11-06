@@ -35,8 +35,6 @@ const actionsToSmartContractActions = (behaviorGraph: GraphJSON, contractAddress
       };
     }) || [];
 
-  console.log(result);
-
   return result;
 };
 
