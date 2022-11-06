@@ -46,9 +46,6 @@
     "deploy-mumbai": "npx hardhat --network mumbai run scripts/deploy.ts",
     "deploy-skale": "npx hardhat --network skale run scripts/deploy.ts"
   },
-  "engines": {
-    "node": "14.8.0"
-  },
   "workspaces": [
     "framework",
     "editor",
