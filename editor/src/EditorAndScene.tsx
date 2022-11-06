@@ -1,22 +1,26 @@
-import { useGLTF } from '@react-three/drei';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import FlowEditor from './flowEditor/FlowEditorApp';
 import { buildGraphEvaluator, useRegistry } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
-import useSceneModifier, { OnClickListener } from './scene/useSceneModifier';
-import rawGraphJSON from './exampleGraphs/ClickToAnimate.json';
+import rawGraphJSON from './exampleGraphs/SpinningSuzanne.json';
 import { GraphEvaluator, GraphJSON } from '@behavior-graph/framework';
 import { behaveToFlow } from './flowEditor/transformers/behaveToFlow';
 import { useEdgesState, useNodesState } from 'reactflow';
 import '@rainbow-me/rainbowkit/styles.css';
-import Web3Login from './nav/Web3Login';
-import MintButton from './nav/SaveToIpfsAndMintButton';
 import { flowToBehave } from './flowEditor/transformers/flowToBehave';
 import useTokenContractAddress from './web3/useTokenContractAddressAndAbi';
 import useLoadSceneAndRegistry from './hooks/useLoadSceneAndRegistry';
-import Nav from './nav/Nav';
+import Nav, { modelOptions } from './nav/Nav';
 
-function EditorAndScene({ modelUrl, rawGraphJSON }: { modelUrl: string; rawGraphJSON: GraphJSON }) {
+function EditorAndScene({
+  modelUrl,
+  rawGraphJSON,
+  setModelUrl,
+}: {
+  modelUrl: string;
+  rawGraphJSON: GraphJSON;
+  setModelUrl: (url: string) => void;
+}) {
   const { sceneJson, scene, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
     modelUrl,
   });
@@ -69,7 +73,7 @@ function EditorAndScene({ modelUrl, rawGraphJSON }: { modelUrl: string; rawGraph
       </div>
       <div className="h-full grid">
         <div className="row-span-1">
-          <Nav contractAddress={contractAddress} graphJson={graphJson} modelUrl={modelUrl} />
+          <Nav contractAddress={contractAddress} graphJson={graphJson} modelUrl={modelUrl} setModelUrl={setModelUrl} />
         </div>
         <div className="row-span-6">
           <Scene
@@ -86,11 +90,24 @@ function EditorAndScene({ modelUrl, rawGraphJSON }: { modelUrl: string; rawGraph
 }
 
 function EditorAndSceneWrapper() {
-  const [modelUrl] = useState('/FlashSuzanne.gltf');
+  const [modelUrl, setModelUrl] = useState(() => modelOptions[0]);
+
+  const [refresh, setRefresh] = useState(false);
+
+  const updateUrl = useCallback((url: string) => {
+    setRefresh(true);
+    setModelUrl(url);
+
+    setTimeout(() => {
+      setRefresh(false);
+    }, 100);
+  }, []);
+
+  if (refresh) return null;
 
   return (
     <Suspense fallback={null}>
-      <EditorAndScene modelUrl={modelUrl} rawGraphJSON={rawGraphJSON as GraphJSON} />
+      <EditorAndScene modelUrl={modelUrl} rawGraphJSON={rawGraphJSON as GraphJSON} setModelUrl={updateUrl} />
     </Suspense>
   );
 }
