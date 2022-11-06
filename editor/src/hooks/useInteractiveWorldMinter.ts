@@ -1,4 +1,4 @@
-import { GraphJSON } from '@behavior-graph/framework';
+import { GraphJSON, NodeParameterValueJSON } from '@behavior-graph/framework';
 import { useCallback, useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite } from 'wagmi';
 import { saveInteractiveWorldToIpfs } from './ipfs/ipfsInteractiveWorldSaver';
@@ -7,27 +7,33 @@ import { PrepareWriteContractConfig } from '@wagmi/core';
 
 type TokenizedAction = {
   nodeType: number;
+  id: string;
   tokenGateRule: {
     active: boolean;
     tokenContract: `0x${string}`;
   };
 };
 
-const tokenizableActionTypes: string[] = ['scene/nodeClick'];
+export const tokenizableActionTypes: string[] = ['scene/nodeClick'];
 
 const actionsToSmartContractActions = (behaviorGraph: GraphJSON, contractAddress: string): TokenizedAction[] => {
   const validNodes = behaviorGraph.nodes?.filter((x) => tokenizableActionTypes.includes(x.type));
 
   const result: TokenizedAction[] =
-    validNodes?.map(
-      (x): TokenizedAction => ({
+    validNodes?.map((x): TokenizedAction => {
+      const activeParam = x.parameters?.tokenGated as NodeParameterValueJSON | undefined;
+      const active = !!activeParam?.value;
+      const addressParam = x.parameters?.tokenGatedAddress as NodeParameterValueJSON | undefined;
+      const address = addressParam?.value;
+      return {
+        id: x.id,
         nodeType: 0,
         tokenGateRule: {
-          active: false,
-          tokenContract: contractAddress as `0x${string}`,
+          active,
+          tokenContract: address as `0x${string}`,
         },
-      })
-    ) || [];
+      };
+    }) || [];
 
   console.log(result);
 
@@ -41,13 +47,20 @@ const toMintArgs = (cid: string, behaviorGraph: GraphJSON, contractAddress: stri
 
 export const useSaveSceneToIpfs = ({ modelUrl, behaviorGraph }: { modelUrl: string; behaviorGraph: GraphJSON }) => {
   const [cid, setCid] = useState<string>();
+  const [saving, setSaving] = useState(false);
   const saveSceneToIpfs = useCallback(async () => {
-    const { cid } = await saveInteractiveWorldToIpfs({ modelUrl, behaviorGraph });
+    setSaving(true);
 
-    setCid(cid);
+    try {
+      const { cid } = await saveInteractiveWorldToIpfs({ modelUrl, behaviorGraph });
+
+      setCid(cid);
+    } finally {
+      setSaving(false);
+    }
   }, [modelUrl, behaviorGraph]);
 
-  return { cid, saveSceneToIpfs };
+  return { cid, saveSceneToIpfs, saving };
 };
 
 const useInteractiveWorldMinter = ({
