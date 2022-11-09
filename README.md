@@ -18,3 +18,17 @@ This repo is organized into the following workspaces:
 - [Behavior Graph smart contract unit tests](/test/BehaviorGraph.ts)
 - [Scene Modification code from the Behavior Graph](/editor/src/scene/useSceneModifier.ts)
 - [Hook to mint the behavior graph and actions into the smart contract](/editor/src/hooks/useInteractiveWorldMinter.ts)
+
+## Developer Setup
+
+Install all dependencies:
+
+    yarn install
+
+To start the editor:
+
+    yarn dev
+
+To run the unit tests for the smart contracts
+
+    yarn test
