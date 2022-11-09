@@ -11,9 +11,7 @@ const ContinuouslyModifyScene = ({
 }) => {
   useEffect(() => {
     let timeout: number = 0;
-    console.log('Starting animation');
     const onTick = async () => {
-      console.log('animating');
       lifecycleEmitter.tickEvent.emit();
 
       await graphEvaluator.executeAllAsync(500);

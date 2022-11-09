@@ -15,7 +15,7 @@ import { registerSceneProfile } from '../../lib/Profiles/Scene/registerSceneProf
 import { Registry } from '../../lib/Registry.js';
 import { validateRegistry } from '../../lib/validateRegistry.js';
 import { DummyScene } from './DummyScene.js';
-import { DefaultLogger, ManualLifecycleEventEmitter } from '../../lib/index.js';
+import { DefaultLogger, ManualLifecycleEventEmitter } from '../../index.js';
 
 async function main() {
   //Logger.onVerbose.clear();

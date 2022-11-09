@@ -3,14 +3,7 @@ import { promises as fs } from 'node:fs';
 import { program } from 'commander';
 import { stringify } from 'csv-stringify';
 
-import { Logger } from '../../lib/Diagnostics/Logger.js';
-import { writeNodeSpecsToJSON } from '../../lib/Graphs/IO/writeNodeSpecsToJSON.js';
-import { validateNodeRegistry } from '../../lib/Nodes/Validation/validateNodeRegistry.js';
-import { registerCoreProfile } from '../../lib/Profiles/Core/registerCoreProfile.js';
-import { registerSceneProfile } from '../../lib/Profiles/Scene/registerSceneProfile.js';
-import { Registry } from '../../lib/Registry.js';
-import { DummyScene } from '../exec-graph/DummyScene.js';
-import { DefaultLogger, ManualLifecycleEventEmitter } from '../../lib/index.js';
+import { buildNodeSpec } from '../../lib/buildNodeSpec.js';
 
 async function main() {
   // Logger.onVerbose.clear();
@@ -28,27 +21,12 @@ async function main() {
     throw new Error('no path specified');
   }
 
-  const registry = new Registry();
-  const eventemitter = new ManualLifecycleEventEmitter();
-  registerCoreProfile(registry, new DefaultLogger(), eventemitter);
-  registerSceneProfile(registry, eventemitter, new DummyScene(registry));
+  const nodeSpecJson = buildNodeSpec();
 
-  const errorList: string[] = [];
-  errorList.push(...validateNodeRegistry(registry));
-  if (errorList.length > 0) {
-    Logger.error(`${errorList.length} errors found:`);
-    errorList.forEach((errorText, errorIndex) => {
-      Logger.error(`${errorIndex}: ${errorText}`);
-    });
-    return;
-  }
-
-  const nodeSpecJson = writeNodeSpecsToJSON(registry);
-  nodeSpecJson.sort((a, b) => a.type.localeCompare(b.type));
   const jsonOutput = JSON.stringify(nodeSpecJson, null, ' ');
   if (programOptions.csv) {
     const csvRows: string[][] = [];
-    nodeSpecJson.forEach((nodeSpec) => {
+    nodeSpecJson?.forEach((nodeSpec) => {
       const csvRow: string[] = [];
       csvRow.push(nodeSpec.type, nodeSpec.category);
       for (let i = 0; i < 5; i++) {

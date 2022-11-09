@@ -1,16 +1,21 @@
 {
   "name": "@behavior-graph/framework",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "type": "module",
-  "main": "dist/lib",
-  "types": "dist/lib/index.d.ts",
+  "source": "src/index.ts",
+  "main": "dist/behavior-graph-framework.cjs.js",
+  "module": "dist/behavior-graph-framework.esm.js",
+  "types": "dist/behavior-graph-framework.cjs.d.ts",
+  "sideEffects": false,
+  "preconstruct": {
+    "entrypoints": [
+      "index.ts"
+    ]
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "prepare": "npm run build && npm run export-node-spec dist/node-spec.json",
-    "exec-graph": "npm run build && node --enable-source-maps ./dist/examples/exec-graph/index.js",
-    "export-node-spec": "npm run build && node --enable-source-maps ./dist/examples/export-node-spec/index.js"
+    "ts": "tsc -w",
+    "exec-graph": "npm run build && node --enable-source-maps ./dist/examples/exec-graph/index.js"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
