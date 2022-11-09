@@ -7,12 +7,11 @@ import {
   Vector4
 } from 'three';
 
-import { Assert } from '../../lib/Diagnostics/Assert.js';
-import { EventEmitter } from '../../lib/Events/EventEmitter.js';
-import { IScene } from '../../lib/Profiles/Scene/Abstractions/IScene.js';
-import { Vec2 } from '../../lib/Profiles/Scene/Values/Internal/Vec2.js';
-import { Vec3 } from '../../lib/Profiles/Scene/Values/Internal/Vec3.js';
-import { Vec4 } from '../../lib/Profiles/Scene/Values/Internal/Vec4.js';
+import { 
+  Assert, 
+  EventEmitter, 
+  IScene, Vec2, Vec3, Vec4 } from 'behave-graph'; 
+  
 import { GLTFJson } from './GLTFJson.js';
 
 function mapGlTFNodeIndicesToThreeObject3Ds(

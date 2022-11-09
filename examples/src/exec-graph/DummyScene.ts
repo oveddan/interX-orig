@@ -1,6 +1,4 @@
-import { EventEmitter } from '../../lib/Events/EventEmitter.js';
-import { IScene } from '../../lib/Profiles/Scene/Abstractions/IScene.js';
-import { Registry } from '../../lib/Registry.js';
+import { EventEmitter, IScene, Registry } from 'behave-graph';
 
 export class DummyScene implements IScene {
   public onSceneChanged = new EventEmitter<void>();

@@ -3,19 +3,21 @@ import { promises as fs } from 'node:fs';
 import { program } from 'commander';
 import glob from 'glob';
 
-import { Logger } from '../../lib/Diagnostics/Logger.js';
-import { Engine } from '../../lib/Graphs/Execution/Engine.js';
-import { traceToLogger } from '../../lib/Graphs/Execution/traceToLogger.js';
-import { readGraphFromJSON } from '../../lib/Graphs/IO/readGraphFromJSON.js';
-import { writeGraphToJSON } from '../../lib/Graphs/IO/writeGraphToJSON.js';
-import { validateGraph } from '../../lib/Graphs/Validation/validateGraph.js';
-import { parseSafeFloat } from '../../lib/parseFloats.js';
-import { DefaultLogger } from '../../lib/Profiles/Core/Abstractions/Drivers/DefaultLogger.js';
-import { ManualLifecycleEventEmitter } from '../../lib/Profiles/Core/Abstractions/Drivers/ManualLifecycleEventEmitter.js';
-import { registerCoreProfile } from '../../lib/Profiles/Core/registerCoreProfile.js';
-import { registerSceneProfile } from '../../lib/Profiles/Scene/registerSceneProfile.js';
-import { Registry } from '../../lib/Registry.js';
-import { validateRegistry } from '../../lib/validateRegistry.js';
+import { 
+Logger, 
+Engine, 
+traceToLogger, 
+readGraphFromJSON, 
+writeGraphToJSON, 
+validateGraph, 
+parseSafeFloat, 
+DefaultLogger, 
+ManualLifecycleEventEmitter,
+registerCoreProfile, 
+registerSceneProfile, 
+Registry, 
+validateRegistry
+} from 'behave-graph'
 import { DummyScene } from './DummyScene.js';
 
 async function main() {
