@@ -7,16 +7,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LoadModal } from './LoadModal';
 import { SaveModal } from './SaveModal';
 import { Controls, ControlButton } from 'reactflow';
-import { NodeSpecJSON } from '@behavior-graph/framework';
+import { GraphJSON } from '@behave-graph/core';
 
 const CustomControls = ({
   toggleRun,
-  specJson,
+  graphJson,
   running,
+  additionalControls = null,
+  setBehaviorGraph,
+  setModelFile,
 }: {
   toggleRun: () => void;
-  specJson: NodeSpecJSON[];
   running: boolean;
+  additionalControls?: JSX.Element | null;
+  graphJson: GraphJSON | undefined;
+  setBehaviorGraph: (value: GraphJSON) => void;
+  setModelFile: (file: File) => void;
 }) => {
   const [loadModalOpen, setLoadModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
@@ -26,7 +32,7 @@ const CustomControls = ({
   return (
     <>
       <Controls className="bg-white">
-        <ControlButton title="Help" onClick={() => setHelpModalOpen(true)}>
+        <ControlButton title="Help" onClick={() => setHelpModalOpen(true)} className="align-middle">
           <FontAwesomeIcon icon={faQuestion} />
         </ControlButton>
         <ControlButton title="Load" onClick={() => setLoadModalOpen(true)}>
@@ -41,11 +47,19 @@ const CustomControls = ({
         <ControlButton title="Run" onClick={() => toggleRun()}>
           <FontAwesomeIcon icon={running ? faPause : faPlay} />
         </ControlButton>
+        {additionalControls}
       </Controls>
-      <LoadModal open={loadModalOpen} onClose={() => setLoadModalOpen(false)} />
-      <SaveModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} specJson={specJson} />
-      <HelpModal open={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
-      <ClearModal open={clearModalOpen} onClose={() => setClearModalOpen(false)} />
+      <>
+        <LoadModal
+          open={loadModalOpen}
+          onClose={() => setLoadModalOpen(false)}
+          setBehaviorGraph={setBehaviorGraph}
+          setModelFile={setModelFile}
+        />
+        <SaveModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} graphJson={graphJson} />
+        <HelpModal open={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
+        <ClearModal open={clearModalOpen} onClose={() => setClearModalOpen(false)} />
+      </>
     </>
   );
 };

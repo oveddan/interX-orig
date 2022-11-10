@@ -37,10 +37,6 @@
     "undici": "5.5.1"
   },
   "scripts": {
-    "postinstall": "preconstruct dev",
-    "build": "preconstruct build",
-    "dev": "preconstruct dev",
-    "watch": "preconstruct watch",
     "build-editor": "yarn workspace @behavior-graph/editor build",
     "chain": "npx hardhat node",
     "compile": "npx hardhat compile",
@@ -61,7 +57,7 @@
   ],
   "preconstruct": {
     "packages": [
-      "packages/*"
+      "editor"
     ]
   }
 }

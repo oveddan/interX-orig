@@ -1,4 +1,4 @@
-import { MouseEvent as ReactMouseEvent, useCallback, useMemo, useState } from 'react';
+import { MouseEvent as ReactMouseEvent, useCallback, useState } from 'react';
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -11,40 +11,35 @@ import ReactFlow, {
   Edge,
 } from 'reactflow';
 import { v4 as uuidv4 } from 'uuid';
-import Controls from './components/Controls';
 import NodePicker from './components/NodePicker';
 import { calculateNewEdge } from './util/calculateNewEdge';
-import { IScene, NodeSpecJSON, Registry } from '@behavior-graph/framework';
+import { NodeSpecJSON } from '@behave-graph/core';
 import 'reactflow/dist/style.css';
 import './flowEditor.css';
 import useFlowConfigFromRegistry from './hooks/useFlowConfigFromRegistry';
+import { ISceneWithQueries } from '../abstractions';
 
 function Flow({
-  toggleRun,
-  running,
-  registry,
   nodes,
   onNodesChange,
   edges,
   onEdgesChange,
   specJson,
   scene,
+  controls,
 }: {
-  toggleRun: () => void;
-  running: boolean;
-  registry: Registry | undefined;
   nodes: Node<any>[];
   onNodesChange: OnNodesChange;
   edges: Edge<any>[];
   onEdgesChange: OnEdgesChange;
   specJson: NodeSpecJSON[];
-  scene: IScene;
+  scene: ISceneWithQueries | undefined;
+  controls: JSX.Element | undefined;
 }) {
   const [nodePickerVisibility, setNodePickerVisibility] = useState<XYPosition>();
   const [lastConnectStart, setLastConnectStart] = useState<OnConnectStartParams>();
 
   const { filters, customNodeTypes } = useFlowConfigFromRegistry({
-    registry,
     nodes,
     lastConnectStart,
     specJson,
@@ -133,31 +128,34 @@ function Flow({
   if (!customNodeTypes || !specJson) return null;
 
   return (
-    <ReactFlow
-      nodeTypes={customNodeTypes}
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onConnectStart={handleStartConnect}
-      onConnectEnd={handleStopConnect}
-      fitView
-      fitViewOptions={{ maxZoom: 1 }}
-      onPaneClick={handlePaneClick}
-      onPaneContextMenu={handlePaneContextMenu}
-    >
-      <Controls toggleRun={toggleRun} specJson={specJson} running={running} />
-      <Background variant={BackgroundVariant.Lines} color="#2a2b2d" style={{ backgroundColor: '#1E1F22' }} />
-      {nodePickerVisibility && (
-        <NodePicker
-          position={nodePickerVisibility}
-          filters={filters}
-          onPickNode={handleAddNode}
-          onClose={closeNodePicker}
-        />
-      )}
-    </ReactFlow>
+    <>
+      <ReactFlow
+        nodeTypes={customNodeTypes}
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onConnectStart={handleStartConnect}
+        onConnectEnd={handleStopConnect}
+        fitView
+        fitViewOptions={{ maxZoom: 1 }}
+        onPaneClick={handlePaneClick}
+        onPaneContextMenu={handlePaneContextMenu}
+      >
+        {controls}
+        <Background variant={BackgroundVariant.Lines} color="#2a2b2d" style={{ backgroundColor: '#1E1F22' }} />
+        {nodePickerVisibility && (
+          <NodePicker
+            position={nodePickerVisibility}
+            filters={filters}
+            onPickNode={handleAddNode}
+            onClose={closeNodePicker}
+            specJson={specJson}
+          />
+        )}
+      </ReactFlow>
+    </>
   );
 }
 

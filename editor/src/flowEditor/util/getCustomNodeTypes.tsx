@@ -1,5 +1,6 @@
-import { IScene, NodeSpecJSON } from '@behavior-graph/framework';
+import { NodeSpecJSON } from '@behave-graph/core';
 import { NodeTypes } from 'reactflow';
+import { IScene } from '../../abstractions';
 import { Node } from '../components/Node';
 
 const getCustomNodeTypes = (allSpecs: NodeSpecJSON[], scene: IScene) => {

@@ -1,8 +1,12 @@
+import { Registry, Vec3, Vec4 } from '@behave-graph/core';
 import { ObjectMap } from '@react-three/fiber';
-import { IScene, Vec3, Vec4, Properties, ResourceProperties } from '@behavior-graph/framework';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { Color, Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import { Event, Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
+import { GLTF } from 'three-stdlib';
+
+import { ISceneWithQueries, Properties, ResourceTypes } from '../abstractions';
+import { registerSharedSceneProfiles, registerSpecificSceneProfiles } from '../hooks/profiles';
+import { GLTFJson } from './GLTFJson';
 
 function toVec3(value: Vector3): Vec3 {
   return new Vec3(value.x, value.y, value.z);
@@ -11,35 +15,56 @@ function toVec4(value: Vector4 | Quaternion): Vec4 {
   return new Vec4(value.x, value.y, value.z, value.w);
 }
 
-const shortPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)$/;
-const jsonPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)\/(?<property>[^/]+)$/;
-export type ResourceTypes = 'nodes' | 'materials';
+const shortPathRegEx = /^\/?(?<resource>[^/]+)\/(?<index>\d+)$/;
+const jsonPathRegEx = /^\/?(?<resource>[^/]+)\/(?<index>\d+)\/(?<property>[^/]+)$/;
+
+export type Optional<T> = {
+  [K in keyof T]: T[K] | undefined;
+};
+
 export type Path = {
   resource: ResourceTypes;
-  name: string;
+  index: number;
   property: string;
 };
 
+export function toJsonPathString({ index, property, resource: resourceType }: Optional<Path>, short: boolean) {
+  if (short) {
+    if (!resourceType || typeof index === undefined) return;
+    return `${resourceType}/${index}`;
+  } else {
+    if (!resourceType || typeof index === undefined || !property) return;
+    return `${resourceType}/${index}/${property}`;
+  }
+}
+
 export function parseJsonPath(jsonPath: string, short = false): Path {
   // hack = for now we see if there are 2 segments to know if its short
-  const isShort = jsonPath.split('/').length === 2;
-  const regex = isShort ? shortPathRegEx : jsonPathRegEx;
+  const regex = short ? shortPathRegEx : jsonPathRegEx;
   const matches = regex.exec(jsonPath);
   if (matches === null) throw new Error(`can not parse jsonPath: ${jsonPath}`);
   if (matches.groups === undefined) throw new Error(`can not parse jsonPath (no groups): ${jsonPath}`);
   return {
     resource: matches.groups.resource as ResourceTypes,
-    name: matches.groups.name,
+    index: +matches.groups.index,
     property: matches.groups.property,
   };
 }
 
-function applyPropertyToModel({ resource, name, property }: Path, gltf: GLTF & ObjectMap, value: any) {
+function applyPropertyToModel(
+  { resource, index, property }: Path,
+  gltf: GLTF & ObjectMap,
+  value: any,
+  properties: Properties,
+  setActiveAnimations: (animation: string, active: boolean) => void
+) {
+  const nodeName = getResourceName({ resource, index }, properties);
+  if (!nodeName) throw new Error(`could not get node at index ${index}`);
   if (resource === 'nodes') {
-    const node = gltf.nodes[name];
+    const node = gltf.nodes[nodeName] as unknown as Object3D | undefined;
 
     if (!node) {
-      console.error(`no node at path ${name}`);
+      console.error(`no node at path ${nodeName}`);
       return;
     }
 
@@ -48,10 +73,10 @@ function applyPropertyToModel({ resource, name, property }: Path, gltf: GLTF & O
     return;
   }
   if (resource === 'materials') {
-    const node = gltf.materials[name];
+    const node = gltf.materials[nodeName] as unknown as Material | undefined;
 
     if (!node) {
-      console.error(`no node at path ${name}`);
+      console.error(`no node at path ${nodeName}`);
       return;
     }
 
@@ -60,15 +85,26 @@ function applyPropertyToModel({ resource, name, property }: Path, gltf: GLTF & O
     return;
   }
 
+  if (resource === 'animations') {
+    setActiveAnimations(nodeName, value as boolean);
+    return;
+  }
+
   console.error(`unknown resource type ${resource}`);
 }
 
-function getPropertyFromModel({ resource, name, property }: Path, gltf: GLTF & ObjectMap) {
+const getResourceName = ({ resource, index }: Pick<Path, 'resource' | 'index'>, properties: Properties) => {
+  return properties[resource]?.options[index].name;
+};
+
+const getPropertyFromModel = ({ resource, index, property }: Path, gltf: GLTF & ObjectMap, properties: Properties) => {
   if (resource === 'nodes') {
-    const node = gltf.nodes[name];
+    const nodeName = getResourceName({ resource, index }, properties);
+    if (!nodeName) throw new Error(`could not get node at index ${index}`);
+    const node = gltf.nodes[nodeName] as unknown as Object3D | undefined;
 
     if (!node) {
-      console.error(`no node at path ${name}`);
+      console.error(`no node at path ${nodeName}`);
       return;
     }
 
@@ -76,7 +112,7 @@ function getPropertyFromModel({ resource, name, property }: Path, gltf: GLTF & O
 
     return;
   }
-}
+};
 
 function applyNodeModifier(property: string, objectRef: Object3D, value: any) {
   switch (property) {
@@ -117,7 +153,7 @@ function applyMaterialModifier(property: string, materialRef: Material, value: a
   }
 }
 
-function getPropertyValue(property: string, objectRef: Object3D) {
+function getPropertyValue(property: string, objectRef: Object3D<Event>) {
   switch (property) {
     case 'visible': {
       return objectRef.visible;
@@ -136,77 +172,194 @@ function getPropertyValue(property: string, objectRef: Object3D) {
   }
 }
 
+const extractProperties = (gltf: GLTF): Properties => {
+  const nodeProperties = ['visible', 'translation', 'scale', 'rotation', 'color'];
+  const animationProperties = ['playing'];
+  const materialProperties = ['color'];
+
+  const gltfJson = gltf.parser.json as GLTFJson;
+
+  const nodeOptions = gltfJson.nodes?.map(({ name }, index) => ({
+    name: name || index.toString(),
+    index,
+  }));
+  const materialOptions = gltfJson.materials?.map(({ name }, index) => ({
+    name: name || index.toString(),
+    index,
+  }));
+  const animationOptions = gltf.animations?.map(({ name }, index) => ({
+    name: name || index.toString(),
+    index,
+  }));
+
+  const properties: Properties = {};
+
+  if (nodeOptions) {
+    properties.nodes = { options: nodeOptions, properties: nodeProperties };
+  }
+
+  if (materialOptions) {
+    properties.materials = {
+      options: materialOptions,
+      properties: materialProperties,
+    };
+  }
+
+  if (animationOptions) {
+    properties.animations = {
+      options: animationOptions,
+      properties: animationProperties,
+    };
+  }
+
+  return properties;
+};
+
+export type OnClickCallback = (jsonPath: string) => void;
+
 export type OnClickListener = {
   path: Path;
-  jsonPath: string;
-  callback: (jsonPath: string) => void;
+  elementName: string;
+  callbacks: OnClickCallback[];
+};
+
+export type OnClickListeners = {
+  [jsonPath: string]: OnClickListener;
 };
 
 const buildSceneModifier = (
   gltf: GLTF & ObjectMap,
-  setOnClickListeners: Dispatch<SetStateAction<OnClickListener[]>>
+  setOnClickListeners: Dispatch<SetStateAction<OnClickListeners>>,
+  setActiveAnimations: (animation: string, active: boolean) => void
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-
-  // clear listenerrs at first
-  setOnClickListeners([]);
+  const properties = extractProperties(gltf);
 
   const addOnClickedListener = (jsonPath: string, callback: (jsonPath: string) => void) => {
-    const path = parseJsonPath(jsonPath);
+    const path = parseJsonPath(jsonPath, true);
 
-    const newListner: OnClickListener = {
-      path,
-      jsonPath,
-      callback,
-    };
+    setOnClickListeners((existing) => {
+      const listenersForPath = existing[jsonPath] || {
+        path,
+        elementName: getResourceName({ resource: path.resource, index: path.index }, properties),
+        callbacks: [],
+      };
 
-    setOnClickListeners((existing) => [...existing, newListner]);
+      const updatedListeners: OnClickListener = {
+        ...listenersForPath,
+        callbacks: [...listenersForPath.callbacks, callback],
+      };
+
+      const result: OnClickListeners = {
+        ...existing,
+        [jsonPath]: updatedListeners,
+      };
+
+      return result;
+    });
   };
+
+  const removeOnClickedListener = (jsonPath: string, callback: (jsonPath: string) => void) => {
+    setOnClickListeners((existing) => {
+      const listenersForPath = existing[jsonPath];
+
+      if (!listenersForPath) return existing;
+
+      const updatedCallbacks = listenersForPath.callbacks.filter((x) => x !== callback);
+
+      if (updatedCallbacks.length > 0) {
+        const updatedListeners = {
+          ...listenersForPath,
+          callback: updatedCallbacks,
+        };
+
+        return {
+          ...existing,
+          [jsonPath]: updatedListeners,
+        };
+      }
+
+      const result = {
+        ...existing,
+      };
+
+      delete result[jsonPath];
+
+      return result;
+    });
+  };
+
   const getProperty = (jsonPath: string, valueTypeName: string) => {
     const path = parseJsonPath(jsonPath);
 
-    return getPropertyFromModel(path, gltf);
+    return getPropertyFromModel(path, gltf, properties);
   };
 
   const setProperty = (jsonPath: string, valueTypeName: string, value: any) => {
     const path = parseJsonPath(jsonPath);
 
-    applyPropertyToModel(path, gltf, value);
+    applyPropertyToModel(path, gltf, value, properties, setActiveAnimations);
   };
 
-  const getProperties = (): Properties => {
-    const nodeProperties = ['visible', 'translation', 'scale', 'rotation', 'color'];
-    const materialProperties = ['color'];
+  const getProperties = () => properties;
 
-    const nodeNames = Object.entries(gltf.nodes).map(([name]) => name);
-    const materialNames = Object.entries(gltf.materials).map(([name]) => name);
-
-    const properties: Properties = {
-      nodes: { names: nodeNames, properties: nodeProperties },
-      materials: { names: materialNames, properties: materialProperties },
-    };
-
-    return properties;
-  };
-
-  const scene: IScene = {
+  const scene: ISceneWithQueries = {
     getProperty,
     setProperty,
     getProperties,
     addOnClickedListener,
+    removeOnClickedListener,
   };
 
   return scene;
 };
 
-const useSceneModifier = (gltf: GLTF & ObjectMap, setOnClickListeners: Dispatch<SetStateAction<OnClickListener[]>>) => {
-  const [scene, setScene] = useState<IScene>();
+export type AnimationsState = { [key: string]: boolean };
+
+const useSceneModifier = (gltf: (GLTF & ObjectMap) | undefined) => {
+  const [scene, setScene] = useState<ISceneWithQueries>();
+
+  const [activeAnimations, setActiveAnimations] = useState<AnimationsState>({});
+  const [sceneOnClickListeners, setSceneOnClickListeners] = useState<OnClickListeners>({});
 
   useEffect(() => {
-    setScene(buildSceneModifier(gltf, setOnClickListeners));
-  }, [gltf, setOnClickListeners]);
+    // reset state on new active animations
+    setActiveAnimations({});
+  }, [gltf]);
 
-  return scene;
+  const setAnimationActive = useCallback((animation: string, active: boolean) => {
+    setActiveAnimations((existing) => {
+      if (!!existing[animation] === active) return existing;
+
+      return {
+        ...existing,
+        [animation]: active,
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!gltf) {
+      setScene(undefined);
+    } else {
+      setScene(buildSceneModifier(gltf, setSceneOnClickListeners, setAnimationActive));
+    }
+  }, [gltf, setSceneOnClickListeners, setAnimationActive]);
+
+  const registerProfile = useCallback(
+    (registry: Registry) => {
+      if (!scene) return;
+      registerSharedSceneProfiles(registry, scene);
+      registerSpecificSceneProfiles(registry, scene);
+    },
+    [scene]
+  );
+
+  return {
+    scene,
+    animations: activeAnimations,
+    sceneOnClickListeners,
+    registerSceneProfile: registerProfile,
+  };
 };
 
 export default useSceneModifier;

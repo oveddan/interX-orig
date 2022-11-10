@@ -46,7 +46,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         return "ipfs://";
     }
 
-    function safeMint(string memory sceneUri, Node[] calldata _nodes) public onlyOwner returns(uint256) {
+    function safeMint(string memory sceneUri, Node[] calldata _nodes) public returns(uint256) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         address to = msg.sender;
@@ -72,7 +72,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         return super.tokenURI(tokenId);
     } 
 
-     function _createNodes(uint256 tokenId, Node[] calldata _nodes) private onlyOwner {
+     function _createNodes(uint256 tokenId, Node[] calldata _nodes) private {
         for(uint256 i = 0; i < _nodes.length; i++) {
           Node calldata node = _nodes[i];
           _tokenNodes[tokenId][node.id] = node;
@@ -91,6 +91,11 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         uint256 actionCount = ++_tokenNodeEmitCount[tokenId][_nodeId];
     
         emit ActionExecuted(msg.sender, tokenId, _nodeId, actionCount);
+    }
+
+    function getActionCount(uint256 tokenId, string calldata _nodeId) public view returns(uint256) {
+        // uint256 numberElems = _nodeIds.length;
+        return _tokenNodeEmitCount[tokenId][_nodeId];
     }
 
     function getActionCounts(uint256 tokenId, string[] calldata _nodeIds) public view returns(uint256[] memory) {

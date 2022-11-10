@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useContract, useContractEvent, useContractWrite, usePrepareContractWrite, useSigner } from 'wagmi';
+import { useContract, useContractEvent, useSigner } from 'wagmi';
 import { abi } from '../contracts/abi';
 import { BigNumber } from 'ethers';
-import { ISmartContractActions } from '@behavior-graph/framework';
+import { ISmartContractActions } from '../abstractions';
 
-type hn = { [id: string]: (count: number) => void };
+type hn = { [id: string]: (count: bigint) => void };
 
 const useSmartContractActions = (contractAddress: string, tokenId: number) => {
-  const [activeActionId, setActiveActionId] = useState<string>('');
-
-  const args = useMemo(() => [tokenId, activeActionId], [tokenId, activeActionId]);
-
   const { data: signer } = useSigner();
 
   const contract = useContract({
@@ -24,6 +20,8 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
   useEffect(() => {
     if (!contract || !signer) return;
     const result = contract?.connect(signer);
+
+    console.log('contract connected');
 
     // @ts-ignore
     setConnected(result);
@@ -39,17 +37,54 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
       if (tokenId !== actionTokenId.toNumber()) return;
 
       const handler = actionExecutedHandlers.current[nodeId];
-      if (handler) handler(actionCount.toNumber());
+      if (handler) handler(BigInt(actionCount.toNumber()));
     },
   });
-  // address: contractAddress,
-  // abi,
-  // functionName: 'executeAction',
-  // on
-  // });
 
-  const registerTriggerHandler = useCallback((id: string, cb: (count: number) => void) => {
-    actionExecutedHandlers.current[id] = cb;
+  const getActionCount = useCallback(
+    async (id: string, connectedContract: typeof contract) => {
+      console.log('no connected contract yet');
+      if (!connectedContract) return;
+
+      console.log('getting action count');
+      const actionCount = await connectedContract.getActionCount(BigNumber.from(tokenId), id);
+
+      console.log('got action count', actionCount.toNumber());
+
+      return actionCount.toNumber();
+    },
+    [typeof contract]
+  );
+
+  useEffect(() => {
+    if (!connectedContract) return;
+
+    console.log('got connected contract', actionExecutedHandlers.current);
+    Object.entries(actionExecutedHandlers.current).forEach(async ([action, handler]) => {
+      const actionCount = await getActionCount(action, connectedContract);
+
+      console.log('connected now executing', actionCount);
+      handler(BigInt(actionCount || 0));
+    });
+  }, [connectedContract, getActionCount]);
+
+  const registerTriggerHandler = useCallback(
+    async (id: string, cb: (count: bigint) => void) => {
+      actionExecutedHandlers.current[id] = cb;
+      if (!connectedContract) return;
+      console.log('setting trigger handler', actionExecutedHandlers.current);
+
+      const actionCount = await getActionCount(id, connectedContract);
+
+      if (actionCount) {
+        cb(BigInt(actionCount));
+      }
+    },
+    [getActionCount, connectedContract]
+  );
+
+  const unRegisterTriggerHandler = useCallback((id: string, cb: (count: bigint) => void) => {
+    delete actionExecutedHandlers.current[id];
   }, []);
 
   const invoke = useCallback(
@@ -70,10 +105,11 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
         invoke(actionId, connectedContract);
       },
       registerTriggerHandler,
+      unRegisterTriggerHandler,
     };
 
     return result;
-  }, [invoke, registerTriggerHandler, connectedContract]);
+  }, [invoke, registerTriggerHandler, unRegisterTriggerHandler, connectedContract]);
 
   return smartContractAction;
 };

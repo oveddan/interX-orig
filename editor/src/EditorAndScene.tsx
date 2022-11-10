@@ -1,113 +1,106 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import FlowEditor from './flowEditor/FlowEditorApp';
-import { buildGraphEvaluator, useRegistry } from './hooks/behaviorFlow';
+import { Suspense, useCallback } from 'react';
 import Scene from './scene/Scene';
-import rawGraphJSON from './exampleGraphs/ClickToAnimate.json';
-import { GraphEvaluator, GraphJSON } from '@behavior-graph/framework';
-import { behaveToFlow } from './flowEditor/transformers/behaveToFlow';
-import { useEdgesState, useNodesState } from 'reactflow';
 import '@rainbow-me/rainbowkit/styles.css';
-import { flowToBehave } from './flowEditor/transformers/flowToBehave';
-import useTokenContractAddress from './web3/useTokenContractAddressAndAbi';
-import useLoadSceneAndRegistry from './hooks/useLoadSceneAndRegistry';
-import Nav, { modelOptions } from './nav/Nav';
+import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
+import './styles/resizer.css';
+import Controls from './flowEditor/components/Controls';
+import Nav from './nav/Nav';
+import PublishingControls from './web3/PublishingControls';
+import useNodeSpecJson from './hooks/useNodeSpecJson';
+import useRegistry from './hooks/useRegistry';
+import useSetAndLoadModelFile, { exampleModelFileUrl } from './hooks/useSetAndLoadModelFile';
+import useBehaveGraphFlow, { exampleBehaveGraphFileUrl } from './hooks/useBehaveGraphFlow';
+import useEngine from './hooks/useEngine';
+import useSceneModifier from './scene/useSceneModifier';
+import Flow from './flowEditor/FlowEditorApp';
+import SplitEditor from './SplitEditor';
+import { examplePairs } from './flowEditor/components/LoadModal';
+import { Registry } from '@behave-graph/core';
+import useRegisterSmartContractActions from './onChainWorld/useRegisterSmartContractActions';
 
-function EditorAndScene({
-  modelUrl,
-  rawGraphJSON,
-  setModelUrl,
-}: {
-  modelUrl: string;
-  rawGraphJSON: GraphJSON;
-  setModelUrl: (url: string) => void;
-}) {
-  const { sceneJson, scene, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
-    modelUrl,
+const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
+
+const initialModelFileUrl = exampleModelFileUrl(initialModelFile);
+const initialBehaviorGraphUrl = exampleBehaveGraphFileUrl(initialBehaviorGraph);
+
+function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
+  const smartContractActions = useMockSmartContractActions();
+  const registerSmartContractActions = useRegisterSmartContractActions(smartContractActions);
+
+  const { modelFile, setModelFile, gltf } = useSetAndLoadModelFile({
+    initialFileUrl: initialModelFileUrl,
   });
-  const [initialNodes, initialEdges] = useMemo(() => behaveToFlow(rawGraphJSON), [rawGraphJSON]);
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
-  const [run, setRun] = useState(false);
+  const { scene, animations, sceneOnClickListeners, registerSceneProfile } = useSceneModifier(gltf);
 
-  const [graphEvaluator, setGraphEvaluator] = useState<GraphEvaluator>();
+  const registerProfiles = useCallback(
+    (registry: Registry) => {
+      registerSmartContractActions(registry);
+      registerSceneProfile(registry);
+    },
+    [registerSceneProfile, smartContractActions]
+  );
 
-  const [graphJson, setGraphJson] = useState<GraphJSON>();
+  const { registry, lifecyleEmitter } = useRegistry({
+    registerProfiles,
+  });
 
-  useEffect(() => {
-    if (!specJson) return;
-    const graphJson = flowToBehave({ nodes, edges, nodeSpecJSON: specJson });
-    setGraphJson(graphJson);
-  }, [nodes, edges, specJson]);
+  const specJson = useNodeSpecJson(registry);
 
-  useEffect(() => {
-    if (!graphJson || !registry) return;
+  const { nodes, edges, onNodesChange, onEdgesChange, graphJson, setGraphJson } = useBehaveGraphFlow({
+    initialGraphJsonUrl: initialBehaviorGraphUrl,
+    specJson,
+  });
 
-    const graphEvaluator = buildGraphEvaluator({ graphJson, registry });
+  const { togglePlay, playing } = useEngine({
+    graphJson,
+    registry,
+    eventEmitter: lifecyleEmitter,
+  });
 
-    setGraphEvaluator(graphEvaluator);
-  }, [graphJson, registry]);
+  const web3Controls = web3Enabled ? <PublishingControls graphJson={graphJson} modelFile={modelFile?.file} /> : null;
 
-  const toggleRun = useCallback(() => {
-    setRun((existing) => !existing);
-  }, []);
+  const controls = specJson && (
+    <Controls
+      toggleRun={togglePlay}
+      graphJson={graphJson}
+      running={playing}
+      additionalControls={web3Controls}
+      setBehaviorGraph={setGraphJson}
+      setModelFile={setModelFile}
+    />
+  );
 
-  const contractAddress = useTokenContractAddress();
+  const flowEditor = specJson && (
+    <Flow
+      nodes={nodes}
+      onNodesChange={onNodesChange}
+      edges={edges}
+      onEdgesChange={onEdgesChange}
+      specJson={specJson}
+      controls={controls}
+      scene={scene}
+    />
+  );
+
+  const interactiveModelPreview = gltf && (
+    <Scene gltf={gltf} onClickListeners={sceneOnClickListeners} animationsState={animations} />
+  );
 
   return (
-    <div className="h-full grid grid-cols-2 gap-0">
-      <div className="bg-lime-500 h-full">
-        {specJson && scene && (
-          <FlowEditor
-            toggleRun={toggleRun}
-            registry={registry}
-            nodes={nodes}
-            onNodesChange={onNodesChange}
-            edges={edges}
-            onEdgesChange={onEdgesChange}
-            specJson={specJson}
-            running={run}
-            scene={scene}
-          />
-        )}
+    <>
+      <Nav isWeb3Enabled={web3Enabled} />
+      <div className="w-full h-full relative">
+        <SplitEditor left={flowEditor} right={interactiveModelPreview} />
       </div>
-      <div className="h-full grid">
-        <div className="row-span-1">
-          <Nav contractAddress={contractAddress} graphJson={graphJson} modelUrl={modelUrl} setModelUrl={setModelUrl} />
-        </div>
-        <div className="row-span-6">
-          <Scene
-            scene={sceneJson}
-            graphEvaluator={graphEvaluator}
-            lifecycleEmitter={lifecyleEmitter}
-            run={run}
-            onClickListeners={sceneOnClickListeners}
-          />
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 
-function EditorAndSceneWrapper() {
-  const [modelUrl, setModelUrl] = useState(() => modelOptions[0]);
-
-  const [refresh, setRefresh] = useState(false);
-
-  const updateUrl = useCallback((url: string) => {
-    setRefresh(true);
-    setModelUrl(url);
-
-    setTimeout(() => {
-      setRefresh(false);
-    }, 100);
-  }, []);
-
-  if (refresh) return null;
-
+function EditorAndSceneWrapper(props: { web3Enabled?: boolean }) {
   return (
     <Suspense fallback={null}>
-      <EditorAndScene modelUrl={modelUrl} rawGraphJSON={rawGraphJSON as GraphJSON} setModelUrl={updateUrl} />
+      <EditorAndScene {...props} />
     </Suspense>
   );
 }

@@ -1,30 +1,25 @@
-import { IScene, NodeSpecJSON, Registry } from '@behavior-graph/framework';
+import { NodeSpecJSON } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
 import { NodeTypes, Node, OnConnectStartParams } from 'reactflow';
+import { ISceneWithQueries } from '../../abstractions';
 import { NodePickerFilters } from '../components/NodePicker';
 import getCustomNodeTypes from '../util/getCustomNodeTypes';
 import { getNodePickerFilters } from '../util/getPickerFilters';
 
 const useFlowConfigFromRegistry = ({
-  registry,
   nodes,
   lastConnectStart,
   specJson,
   scene,
 }: {
-  registry: Registry | undefined;
   nodes: Node<any>[];
   lastConnectStart: OnConnectStartParams | undefined;
   specJson: NodeSpecJSON[];
-  scene: IScene;
+  scene: ISceneWithQueries | undefined;
 }) => {
   const [filters, setFilters] = useState<NodePickerFilters | undefined>();
 
   const [customNodeTypes, setCustomNodeTypes] = useState<NodeTypes>();
-
-  useEffect(() => {
-    if (!registry) return;
-  }, [registry]);
 
   useEffect(() => {
     if (!specJson) return;
@@ -34,11 +29,11 @@ const useFlowConfigFromRegistry = ({
   }, [lastConnectStart, nodes, specJson]);
 
   useEffect(() => {
-    if (!specJson) return;
+    if (!specJson || !scene) return;
     const customNodeTypes = getCustomNodeTypes(specJson, scene);
 
     setCustomNodeTypes(customNodeTypes);
-  }, [specJson]);
+  }, [specJson, scene]);
 
   return { filters, customNodeTypes, specJson };
 };

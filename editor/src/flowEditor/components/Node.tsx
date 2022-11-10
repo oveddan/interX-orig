@@ -1,10 +1,11 @@
 import { NodeProps as FlowNodeProps, useEdges } from 'reactflow';
-import { IScene, NodeSpecJSON } from '@behavior-graph/framework';
+import { NodeSpecJSON } from '@behave-graph/core';
 import InputSocket from './InputSocket';
 import NodeContainer from './NodeContainer';
 import OutputSocket from './OutputSocket';
 import { useChangeNodeData } from '../hooks/useChangeNodeData';
 import { isHandleConnected } from '../util/isHandleConnected';
+import { IScene } from '../../abstractions';
 
 type NodeProps = FlowNodeProps & {
   spec: NodeSpecJSON;

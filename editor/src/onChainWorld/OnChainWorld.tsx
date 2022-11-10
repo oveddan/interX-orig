@@ -1,14 +1,14 @@
-import { GraphEvaluator, GraphJSON, ISmartContractActions } from '@behavior-graph/framework';
-import { useGLTF } from '@react-three/drei';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { buildGraphEvaluator } from '../hooks/behaviorFlow';
+import { GraphJSON } from '@behave-graph/core';
+import { useParams } from 'react-router-dom';
+import { useSceneModificationEngine } from '../hooks/behaviorFlow';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
 import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
-import Web3Login from '../nav/Web3Login';
+import Web3Login from '../web3/Web3Login';
 import Scene from '../scene/Scene';
-import useTokenContractAddress from '../web3/useTokenContractAddressAndAbi';
+import useTokenContractAddress from '../web3/useTokenContractAddress';
 import useSmartContractActions from './useSmartContractActions';
+import { ISmartContractActions } from '../abstractions';
+import { useGLTF } from '@react-three/drei';
 
 const OnChainWorld = ({
   graphJson,
@@ -21,22 +21,18 @@ const OnChainWorld = ({
   smartContractActions: ISmartContractActions;
   tokenId: number;
 }) => {
-  const { sceneJson, scene, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
-    modelUrl: sceneFileUrl,
+  const gltf = useGLTF(sceneFileUrl);
+  const { sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
     smartContractActions,
+    gltf,
   });
 
-  const [graphEvaluator, setGraphEvaluator] = useState<GraphEvaluator>();
-
-  useEffect(() => {
-    if (!graphJson || !registry) return;
-
-    const graphEvaluator = buildGraphEvaluator({ graphJson, registry });
-
-    setGraphEvaluator(graphEvaluator);
-  }, [graphJson, registry]);
-
-  useEffect(() => {}, [graphJson]);
+  useSceneModificationEngine({
+    graphJson,
+    eventEmitter: lifecyleEmitter,
+    registry,
+    run: true,
+  });
 
   return (
     <>
@@ -57,13 +53,7 @@ const OnChainWorld = ({
       </nav>
 
       <div className="w-full h-full">
-        <Scene
-          scene={sceneJson}
-          graphEvaluator={graphEvaluator}
-          lifecycleEmitter={lifecyleEmitter}
-          run
-          onClickListeners={sceneOnClickListeners}
-        />
+        <Scene gltf={gltf} animationsState={animations} onClickListeners={sceneOnClickListeners} />
       </div>
     </>
   );
