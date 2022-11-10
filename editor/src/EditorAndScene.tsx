@@ -1,9 +1,10 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import FlowEditor from './flowEditor/FlowEditorApp';
-import { buildGraphEvaluator, useRegistry } from './hooks/behaviorFlow';
+import { useSceneModificationEngine, useGraph, useRegistry } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
 import rawGraphJSON from './exampleGraphs/ClickToAnimate.json';
-import { GraphEvaluator, GraphJSON } from '@behavior-graph/framework';
+// import rawGraphJSON from './exampleGraphs/SpinningSuzanne.json';
+import { GraphJSON } from 'behave-graph';
 import { behaveToFlow } from './flowEditor/transformers/behaveToFlow';
 import { useEdgesState, useNodesState } from 'reactflow';
 import '@rainbow-me/rainbowkit/styles.css';
@@ -30,8 +31,6 @@ function EditorAndScene({
 
   const [run, setRun] = useState(false);
 
-  const [graphEvaluator, setGraphEvaluator] = useState<GraphEvaluator>();
-
   const [graphJson, setGraphJson] = useState<GraphJSON>();
 
   useEffect(() => {
@@ -40,13 +39,12 @@ function EditorAndScene({
     setGraphJson(graphJson);
   }, [nodes, edges, specJson]);
 
-  useEffect(() => {
-    if (!graphJson || !registry) return;
-
-    const graphEvaluator = buildGraphEvaluator({ graphJson, registry });
-
-    setGraphEvaluator(graphEvaluator);
-  }, [graphJson, registry]);
+  useSceneModificationEngine({
+    graphJson,
+    registry,
+    eventEmitter: lifecyleEmitter,
+    run,
+  });
 
   const toggleRun = useCallback(() => {
     setRun((existing) => !existing);
@@ -76,13 +74,7 @@ function EditorAndScene({
           <Nav contractAddress={contractAddress} graphJson={graphJson} modelUrl={modelUrl} setModelUrl={setModelUrl} />
         </div>
         <div className="row-span-6">
-          <Scene
-            scene={sceneJson}
-            graphEvaluator={graphEvaluator}
-            lifecycleEmitter={lifecyleEmitter}
-            run={run}
-            onClickListeners={sceneOnClickListeners}
-          />
+          <Scene scene={sceneJson} onClickListeners={sceneOnClickListeners} />
         </div>
       </div>
     </div>

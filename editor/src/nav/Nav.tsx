@@ -1,4 +1,4 @@
-import { GraphJSON } from '@behavior-graph/framework';
+import { GraphJSON } from 'behave-graph';
 import SaveToIpfsAndMintButton from './SaveToIpfsAndMintButton';
 import Web3Login from './Web3Login';
 

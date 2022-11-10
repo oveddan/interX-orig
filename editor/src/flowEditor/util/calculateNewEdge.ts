@@ -1,14 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Node, OnConnectStartParams } from 'reactflow';
 import { getSocketsByNodeTypeAndHandleType } from './getSocketsByNodeTypeAndHandleType';
-import { NodeSpecJSON } from '@behavior-graph/framework';
+import { NodeSpecJSON } from 'behave-graph';
 
 export const calculateNewEdge = (
   originNode: Node,
   destinationNodeType: string,
   destinationNodeId: string,
   connection: OnConnectStartParams,
-  specJSON: NodeSpecJSON[],
+  specJSON: NodeSpecJSON[]
 ) => {
   const sockets = getSocketsByNodeTypeAndHandleType(specJSON, originNode.type, connection.handleType);
   const originSocket = sockets?.find((socket) => socket.name === connection.handleId);
@@ -16,7 +16,7 @@ export const calculateNewEdge = (
   const newSockets = getSocketsByNodeTypeAndHandleType(
     specJSON,
     destinationNodeType,
-    connection.handleType === 'source' ? 'target' : 'source',
+    connection.handleType === 'source' ? 'target' : 'source'
   );
   const newSocket = newSockets?.find((socket) => socket.valueType === originSocket?.valueType);
 

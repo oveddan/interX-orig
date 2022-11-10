@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useContract, useContractEvent, useContractWrite, usePrepareContractWrite, useSigner } from 'wagmi';
 import { abi } from '../contracts/abi';
 import { BigNumber } from 'ethers';
-import { ISmartContractActions } from '@behavior-graph/framework';
+import { ISmartContractActions } from 'behave-graph';
 
 type hn = { [id: string]: (count: number) => void };
 

@@ -1,41 +1,46 @@
-import { IScene } from '@behavior-graph/framework';
 import { useEffect, useState } from 'react';
-import { parseJsonPath, Path } from '../../scene/useSceneModifier';
-import { useWhyDidYouUpdate } from 'use-why-did-you-update';
+import { parseJsonPath, Path, ResourceTypes, toJsonPathString } from '../../scene/useSceneModifier';
+import { IScene } from '../../abstractions';
 
 const PathSelect = ({
   value,
   onChange,
   getProperties,
   short,
-}: { value: string; onChange: (path: string) => void; short: boolean } & Pick<IScene, 'getProperties'>) => {
+}: { value: string; onChange: (path: string | undefined) => void; short: boolean } & Pick<IScene, 'getProperties'>) => {
   const [initialValue] = useState<Path | undefined>(() => {
+    console.log('parsing:', value, short);
     if (value) {
       return parseJsonPath(value, short);
     } else return;
   });
 
-  const [resourceType, setResourceType] = useState<string | undefined>(initialValue?.resource);
+  const [resourceType, setResourceType] = useState<ResourceTypes | undefined>(initialValue?.resource);
   const [elementName, setElementName] = useState<string | undefined>(initialValue?.name);
   const [property, setProperty] = useState<string | undefined>(initialValue?.property);
 
   const [properties] = useState(getProperties());
 
   useEffect(() => {
-    if (!resourceType || !elementName || !property) return;
+    const jsonPath = toJsonPathString(
+      {
+        name: elementName,
+        property: property,
+        resource: resourceType,
+      },
+      short
+    );
 
-    let path: string;
-    if (short) path = `${resourceType}/${elementName}`;
-    else path = `${resourceType}/${elementName}/${property}`;
+    console.log('got json path string', jsonPath);
 
-    onChange(path);
+    onChange(jsonPath);
   }, [resourceType, elementName, property, onChange, short]);
 
   return (
     <>
       <select
         value={resourceType}
-        onChange={(e) => setResourceType(e.target.value)}
+        onChange={(e) => setResourceType(e.target.value as ResourceTypes | undefined)}
         className=" bg-gray-600 disabled:bg-gray-700 py-1 px-2 nodrag"
       >
         <option>--type--</option>

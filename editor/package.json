@@ -15,6 +15,7 @@
     "@rainbow-me/rainbowkit": "^0.7.1",
     "@react-three/drei": "^9.40.0",
     "@react-three/fiber": "^8.9.1",
+    "behave-graph": "^0.9.5",
     "classnames": "^2.3.2",
     "clsx": "^1.2.1",
     "react": "^18.2.0",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",
+    "@types/three": "^0.146.0",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/parser": "^5.42.0",
     "@vitejs/plugin-react": "^2.2.0",

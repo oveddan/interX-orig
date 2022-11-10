@@ -1,4 +1,4 @@
-import { GraphJSON } from '@behavior-graph/framework';
+import { GraphJSON } from 'behave-graph';
 import { Edge, Node } from 'reactflow';
 import { v4 as uuidv4 } from 'uuid';
 

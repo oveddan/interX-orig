@@ -1,57 +1,51 @@
 {
   "nodes": [
     {
-      "id": "6effc2ef-5228-415f-9614-60eeb5100216",
+      "id": "b7c673cf-34f7-4bda-bfa8-04c281e5da5a",
+      "type": "flow/flipFlop",
+      "metadata": {
+        "positionX": "191.86881720430105",
+        "positionY": "38.177755376344095"
+      }
+    },
+    {
+      "id": "00f8bce9-0ec6-4fb3-9ad7-ac7354194a52",
       "type": "scene/set/boolean",
       "metadata": {
-        "positionX": "290.4641506846415",
-        "positionY": "-324.43459413642114"
+        "positionX": "545.1166666666667",
+        "positionY": "-163.44012096774196"
       },
       "parameters": {
         "jsonPath": {
-          "value": "nodes/Cube/visible"
+          "value": "nodes/Suzanne/visible"
         },
         "value": {
           "link": {
-            "nodeId": "d54414df-4da7-48e1-ba91-2a04b9584c71",
+            "nodeId": "b7c673cf-34f7-4bda-bfa8-04c281e5da5a",
             "socket": "isOn"
           }
         }
       }
     },
     {
-      "id": "d54414df-4da7-48e1-ba91-2a04b9584c71",
-      "type": "flow/flipFlop",
-      "metadata": {
-        "positionX": "56.15650827696621",
-        "positionY": "-503.9874404027421"
-      }
-    },
-    {
-      "id": "c5ca3660-a2d7-401b-8739-e8bdd7329148",
+      "id": "38415624-878a-4030-9899-0c9951013d1c",
       "type": "scene/nodeClick",
       "metadata": {
-        "positionX": "-612.4513318063024",
-        "positionY": "-270.0654426754536"
+        "positionX": "-183.04045698924733",
+        "positionY": "-256.750873655914"
       },
       "parameters": {
         "jsonPath": {
           "value": "nodes/Torus"
-        },
-        "tokenGated": {
-          "value": true
-        },
-        "tokenGatedAddress": {
-          "value": "0xd1e614205d96b5FdBC57C10a149FBd9cDf15CED3"
         }
       },
       "flows": {
         "secondFlow": {
-          "nodeId": "6effc2ef-5228-415f-9614-60eeb5100216",
+          "nodeId": "b7c673cf-34f7-4bda-bfa8-04c281e5da5a",
           "socket": "flow"
         },
         "flow": {
-          "nodeId": "d54414df-4da7-48e1-ba91-2a04b9584c71",
+          "nodeId": "00f8bce9-0ec6-4fb3-9ad7-ac7354194a52",
           "socket": "flow"
         }
       }

@@ -1,4 +1,4 @@
-import { NodeSpecJSON } from '@behavior-graph/framework';
+import { NodeSpecJSON } from 'behave-graph';
 import { Connection, ReactFlowInstance } from 'reactflow';
 import { getSocketsByNodeTypeAndHandleType } from './getSocketsByNodeTypeAndHandleType';
 import { isHandleConnected } from './isHandleConnected';

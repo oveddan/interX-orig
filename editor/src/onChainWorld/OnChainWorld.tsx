@@ -1,14 +1,15 @@
-import { GraphEvaluator, GraphJSON, ISmartContractActions } from '@behavior-graph/framework';
+import { GraphJSON } from 'behave-graph';
 import { useGLTF } from '@react-three/drei';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { buildGraphEvaluator } from '../hooks/behaviorFlow';
+import { useSceneModificationEngine, useGraph } from '../hooks/behaviorFlow';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
 import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
 import Web3Login from '../nav/Web3Login';
 import Scene from '../scene/Scene';
 import useTokenContractAddress from '../web3/useTokenContractAddressAndAbi';
 import useSmartContractActions from './useSmartContractActions';
+import { ISmartContractActions } from '../abstractions';
 
 const OnChainWorld = ({
   graphJson,
@@ -21,22 +22,17 @@ const OnChainWorld = ({
   smartContractActions: ISmartContractActions;
   tokenId: number;
 }) => {
-  const { sceneJson, scene, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
+  const { sceneJson, scene, sceneOnClickListeners, registry, lifecyleEmitter } = useLoadSceneAndRegistry({
     modelUrl: sceneFileUrl,
     smartContractActions,
   });
 
-  const [graphEvaluator, setGraphEvaluator] = useState<GraphEvaluator>();
+  const graph = useGraph(graphJson, registry);
 
-  useEffect(() => {
-    if (!graphJson || !registry) return;
-
-    const graphEvaluator = buildGraphEvaluator({ graphJson, registry });
-
-    setGraphEvaluator(graphEvaluator);
-  }, [graphJson, registry]);
-
-  useEffect(() => {}, [graphJson]);
+  const engine = useSceneModificationEngine({
+    graph,
+    eventEmitter: lifecyleEmitter,
+  });
 
   return (
     <>
@@ -59,7 +55,7 @@ const OnChainWorld = ({
       <div className="w-full h-full">
         <Scene
           scene={sceneJson}
-          graphEvaluator={graphEvaluator}
+          engine={engine}
           lifecycleEmitter={lifecyleEmitter}
           run
           onClickListeners={sceneOnClickListeners}

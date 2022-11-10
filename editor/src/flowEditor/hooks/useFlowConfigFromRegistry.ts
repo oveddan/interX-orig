@@ -1,4 +1,4 @@
-import { IScene, NodeSpecJSON, Registry } from '@behavior-graph/framework';
+import { IScene, NodeSpecJSON, Registry } from 'behave-graph';
 import { useEffect, useState } from 'react';
 import { NodeTypes, Node, OnConnectStartParams } from 'reactflow';
 import { NodePickerFilters } from '../components/NodePicker';

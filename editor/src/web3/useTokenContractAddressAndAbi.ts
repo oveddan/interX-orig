@@ -20,6 +20,10 @@ const getContractAddress = (chainId: number): string => {
     chainName = 'localhost';
   }
 
+  if (chainName === 'Polygon Mumbai') {
+    chainName = 'mumbai';
+  }
+
   const genericAddresses = addresses as { [address: string]: string };
 
   if (!genericAddresses[chainName]) throw new Error(`contract not deployed for chain ${chainName}`);

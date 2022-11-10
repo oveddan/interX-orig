@@ -1,70 +1,73 @@
-import { GraphEvaluator, ILifecycleEventEmitter } from '@behavior-graph/framework';
+import { Engine, ILifecycleEventEmitter } from 'behave-graph';
 import { OrbitControls, Stage, useCursor } from '@react-three/drei';
 import { Canvas, ObjectMap } from '@react-three/fiber';
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { Object3D } from 'three';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Mesh, MeshBasicMaterial, Object3D } from 'three';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
-import RunGraphModificationsOnScene from './RunGraphModificationsOnScene';
-import { OnClickListener } from './useSceneModifier';
+import { OnClickListener, OnClickListeners } from './useSceneModifier';
 
-const Scene = ({
-  scene,
-  run,
-  graphEvaluator,
-  lifecycleEmitter,
-  onClickListeners,
+const RegisterOnClickListenersOnElements = ({
+  jsonPath,
+  listeners,
+  gltf,
+  setHovered,
 }: {
-  scene: GLTF & ObjectMap;
-  run: boolean;
-  graphEvaluator: GraphEvaluator | undefined;
-  lifecycleEmitter: ILifecycleEventEmitter;
-  onClickListeners: OnClickListener[];
+  jsonPath: string;
+  listeners: OnClickListener;
+  gltf: GLTF & ObjectMap;
+  setHovered: (hovered: boolean) => void;
 }) => {
+  const [node, setNode] = useState<Mesh>();
+
+  useEffect(() => {
+    if (listeners.path.resource === 'nodes') {
+      const node = gltf.nodes[listeners.path.name].clone() as Mesh;
+
+      setNode(node);
+      return;
+    }
+    setNode(undefined);
+  }, [listeners.path, gltf]);
+
+  const handleClick = useCallback(() => {
+    listeners.callbacks.forEach((cb) => cb(jsonPath));
+  }, [listeners.callbacks, jsonPath]);
+
+  if (!node) return null;
+
+  return (
+    <primitive
+      object={node}
+      onClick={handleClick}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+    />
+  );
+};
+
+const Scene = ({ scene, onClickListeners }: { scene: GLTF & ObjectMap; onClickListeners: OnClickListeners }) => {
   const mainRef = useRef<Object3D>();
   const [hovered, setHovered] = useState(false);
   useCursor(hovered, 'pointer', 'auto');
-
-  const clickedListeners = useMemo(() => {
-    return (
-      <>
-        {onClickListeners.map((listener, i) => {
-          if (listener.path.resource === 'nodes') {
-            const node = scene.nodes[listener.path.name];
-
-            if (node) {
-              const cloned = node.clone();
-              return (
-                <primitive
-                  key={i}
-                  object={cloned}
-                  visible={false}
-                  onClick={() => listener.callback(listener.jsonPath)}
-                  onPointerOver={() => setHovered(true)}
-                  onPointerOut={() => setHovered(false)}
-                />
-              );
-            }
-
-            return <Fragment key={i}></Fragment>;
-          }
-        })}
-      </>
-    );
-  }, [onClickListeners, scene]);
 
   return (
     <Canvas className="w-full h-full">
       <OrbitControls target={mainRef.current?.position} makeDefault />
       <Stage shadows adjustCamera intensity={1} environment="city" preset="rembrandt">
         <>
-          <primitive object={scene.scene} ref={mainRef} />
-          {clickedListeners}
+          <primitive object={scene.scene} ref={mainRef}>
+            {Object.entries(onClickListeners).map(([jsonPath, listeners]) => (
+              <RegisterOnClickListenersOnElements
+                key={jsonPath}
+                gltf={scene}
+                jsonPath={jsonPath}
+                listeners={listeners}
+                setHovered={setHovered}
+              />
+            ))}
+          </primitive>
         </>
       </Stage>
-
-      {graphEvaluator && lifecycleEmitter && (
-        <RunGraphModificationsOnScene graphEvaluator={graphEvaluator} lifecycleEmitter={lifecycleEmitter} run={run} />
-      )}
     </Canvas>
   );
 };

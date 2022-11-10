@@ -1,44 +1,48 @@
 {
   "nodes": [
     {
-      "type": "lifecycle/onTick",
       "id": "0",
+      "type": "lifecycle/onTick",
+      "metadata": {
+        "positionX": "-225",
+        "positionY": "-2"
+      },
       "flows": {
         "flow": {
           "nodeId": "3",
           "socket": "flow"
         }
-      },
-      "metadata": {
-        "positionX": "-579",
-        "positionY": "0"
       }
     },
     {
-      "type": "math/create/euler",
       "id": "1",
+      "type": "math/create/euler",
+      "metadata": {
+        "positionX": "78",
+        "positionY": "108"
+      },
       "parameters": {
-        "x": {
-          "link": {
-            "nodeId": "0",
-            "socket": "time"
-          }
-        },
         "y": {
           "value": 0
         },
         "z": {
           "value": 0
+        },
+        "x": {
+          "link": {
+            "nodeId": "0",
+            "socket": "time"
+          }
         }
-      },
-      "metadata": {
-        "positionX": "-400",
-        "positionY": "100"
       }
     },
     {
-      "type": "math/toQuat/euler",
       "id": "2",
+      "type": "math/toQuat/euler",
+      "metadata": {
+        "positionX": "307",
+        "positionY": "109"
+      },
       "parameters": {
         "a": {
           "link": {
@@ -46,18 +50,18 @@
             "socket": "result"
           }
         }
-      },
-      "metadata": {
-        "positionX": "-200",
-        "positionY": "100"
       }
     },
     {
-      "type": "scene/set/quat",
       "id": "3",
+      "type": "scene/set/quat",
+      "metadata": {
+        "positionX": "563",
+        "positionY": "-85"
+      },
       "parameters": {
         "jsonPath": {
-          "value": "/nodes/Suzanne/rotation"
+          "value": "nodes/Suzanne/rotation"
         },
         "value": {
           "link": {
@@ -67,5 +71,7 @@
         }
       }
     }
-  ]
+  ],
+  "variables": [],
+  "customEvents": []
 }

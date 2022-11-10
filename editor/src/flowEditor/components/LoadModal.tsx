@@ -1,4 +1,4 @@
-import { GraphJSON } from '@behavior-graph/framework';
+import { GraphJSON } from 'behave-graph';
 import { FC, useState } from 'react';
 import { useReactFlow } from 'reactflow';
 import { behaveToFlow } from '../transformers/behaveToFlow';
@@ -8,11 +8,11 @@ import { Modal } from './Modal';
 
 import ClickToAnimate from '../../exampleGraphs/ClickToAnimate.json';
 import SpinningModel from '../../exampleGraphs/SpinningSuzanne.json';
-// import Branch from '@behavior-graph/framework/dist/graphs/core/flow/Branch.json';
-// import Delay from '@behavior-graph/framework/dist/graphs/core/async/Delay.json';
-// import HelloWorld from '@behavior-graph/framework/dist/graphs/core//HelloWorld.json';
-// import Polynomial from '@behavior-graph/framework/dist/graphs/core/logic/Polynomial.json';
-// import SetGet from '@behavior-graph/framework/dist/graphs/core/variables/SetGet.json';
+// import Branch from 'behave-graph/dist/graphs/core/flow/Branch.json';
+// import Delay from 'behave-graph/dist/graphs/core/async/Delay.json';
+// import HelloWorld from 'behave-graph/dist/graphs/core//HelloWorld.json';
+// import Polynomial from 'behave-graph/dist/graphs/core/logic/Polynomial.json';
+// import SetGet from 'behave-graph/dist/graphs/core/variables/SetGet.json';
 
 // TODO remove when json types fixed in @behavior-graph/framework
 const examples = {

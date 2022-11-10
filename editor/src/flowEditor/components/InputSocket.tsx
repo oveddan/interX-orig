@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Connection, Handle, Position, useReactFlow } from 'reactflow';
 import cx from 'classnames';
 import { colors, valueTypeColorMap } from '../util/colors';
-import { InputSocketSpecJSON, IScene, NodeSpecJSON } from '@behavior-graph/framework';
+import { InputSocketSpecJSON, IScene, NodeSpecJSON } from 'behave-graph';
 import { isValidConnection } from '../util/isValidConnection';
 import { AutoSizeInput } from './AutoSizeInput';
 import PathSelect from './PathSelect';

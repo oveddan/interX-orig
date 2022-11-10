@@ -1,4 +1,4 @@
-import { GraphJSON, NodeParameterValueJSON } from '@behavior-graph/framework';
+import { GraphJSON, NodeParameterValueJSON } from 'behave-graph';
 import { useCallback, useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite } from 'wagmi';
 import { saveInteractiveWorldToIpfs } from './ipfs/ipfsInteractiveWorldSaver';

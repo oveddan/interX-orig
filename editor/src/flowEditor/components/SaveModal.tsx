@@ -1,4 +1,4 @@
-import { NodeSpecJSON } from '@behavior-graph/framework';
+import { NodeSpecJSON } from 'behave-graph';
 import { FC, useMemo, useRef, useState } from 'react';
 import { useEdges, useNodes } from 'reactflow';
 import { flowToBehave } from '../transformers/flowToBehave';

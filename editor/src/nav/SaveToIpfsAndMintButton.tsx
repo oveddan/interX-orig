@@ -1,4 +1,4 @@
-import { GraphJSON } from '@behavior-graph/framework';
+import { GraphJSON } from 'behave-graph';
 import { ClampToEdgeWrapping } from 'three';
 import useInteractiveWorldMinter, { useSaveSceneToIpfs } from '../hooks/useInteractiveWorldMinter';
 import clsx from 'clsx';

@@ -1,12 +1,12 @@
 import { Node, OnConnectStartParams } from 'reactflow';
 import { NodePickerFilters } from '../components/NodePicker';
 import { getSocketsByNodeTypeAndHandleType } from './getSocketsByNodeTypeAndHandleType';
-import { NodeSpecJSON } from '@behavior-graph/framework';
+import { NodeSpecJSON } from 'behave-graph';
 
 export const getNodePickerFilters = (
   nodes: Node[],
   params: OnConnectStartParams | undefined,
-  specJSON: NodeSpecJSON[],
+  specJSON: NodeSpecJSON[]
 ): NodePickerFilters | undefined => {
   if (params === undefined) return;
 

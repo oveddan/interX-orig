@@ -1,7 +1,8 @@
 import { ObjectMap } from '@react-three/fiber';
-import { IScene, Vec3, Vec4, Properties, ResourceProperties } from '@behavior-graph/framework';
+import { Vec3, Vec4 } from 'behave-graph';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { Color, Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
+import { Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
+import { IScene, Properties } from '../abstractions';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 
 function toVec3(value: Vector3): Vec3 {
@@ -14,16 +15,33 @@ function toVec4(value: Vector4 | Quaternion): Vec4 {
 const shortPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)$/;
 const jsonPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)\/(?<property>[^/]+)$/;
 export type ResourceTypes = 'nodes' | 'materials';
+
+export type Optional<T> = {
+  [K in keyof T]: T[K] | undefined;
+};
+
 export type Path = {
   resource: ResourceTypes;
   name: string;
   property: string;
 };
 
+export function toJsonPathString(
+  { name: elementName, property, resource: resourceType }: Optional<Path>,
+  short: boolean
+) {
+  if (short) {
+    if (!resourceType || !elementName) return;
+    return `${resourceType}/${elementName}`;
+  } else {
+    if (!resourceType || !elementName || !property) return;
+    return `${resourceType}/${elementName}/${property}`;
+  }
+}
+
 export function parseJsonPath(jsonPath: string, short = false): Path {
   // hack = for now we see if there are 2 segments to know if its short
-  const isShort = jsonPath.split('/').length === 2;
-  const regex = isShort ? shortPathRegEx : jsonPathRegEx;
+  const regex = short ? shortPathRegEx : jsonPathRegEx;
   const matches = regex.exec(jsonPath);
   if (matches === null) throw new Error(`can not parse jsonPath: ${jsonPath}`);
   if (matches.groups === undefined) throw new Error(`can not parse jsonPath (no groups): ${jsonPath}`);
@@ -136,32 +154,79 @@ function getPropertyValue(property: string, objectRef: Object3D) {
   }
 }
 
+export type OnClickCallback = (jsonPath: string) => void;
+
 export type OnClickListener = {
   path: Path;
-  jsonPath: string;
-  callback: (jsonPath: string) => void;
+  callbacks: OnClickCallback[];
+};
+
+export type OnClickListeners = {
+  [jsonPath: string]: OnClickListener;
 };
 
 const buildSceneModifier = (
   gltf: GLTF & ObjectMap,
-  setOnClickListeners: Dispatch<SetStateAction<OnClickListener[]>>
+  setOnClickListeners: Dispatch<SetStateAction<OnClickListeners>>
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
 
   // clear listenerrs at first
-  setOnClickListeners([]);
-
   const addOnClickedListener = (jsonPath: string, callback: (jsonPath: string) => void) => {
-    const path = parseJsonPath(jsonPath);
+    const path = parseJsonPath(jsonPath, true);
 
-    const newListner: OnClickListener = {
-      path,
-      jsonPath,
-      callback,
-    };
+    setOnClickListeners((existing) => {
+      const listenersForPath = existing[jsonPath] || {
+        path,
+        callbacks: [],
+      };
 
-    setOnClickListeners((existing) => [...existing, newListner]);
+      const updatedListeners: OnClickListener = {
+        ...listenersForPath,
+        callbacks: [...listenersForPath.callbacks, callback],
+      };
+
+      const result: OnClickListeners = {
+        ...existing,
+        [jsonPath]: updatedListeners,
+      };
+
+      return result;
+    });
   };
+
+  const removeOnClickedListener = (jsonPath: string, callback: (jsonPath: string) => void) => {
+    setOnClickListeners((existing) => {
+      const listenersForPath = existing[jsonPath];
+
+      if (!listenersForPath) return existing;
+
+      const updatedCallbacks = listenersForPath.callbacks.filter((x) => x !== callback);
+
+      if (updatedCallbacks.length > 0) {
+        const updatedListeners = {
+          ...listenersForPath,
+          callback: updatedCallbacks,
+        };
+
+        return {
+          ...existing,
+          [jsonPath]: updatedListeners,
+        };
+      }
+
+      console.log('none left...clearing');
+
+      const result = {
+        ...existing,
+      };
+
+      delete result[jsonPath];
+
+      return result;
+    });
+  };
+
   const getProperty = (jsonPath: string, valueTypeName: string) => {
     const path = parseJsonPath(jsonPath);
 
@@ -194,12 +259,13 @@ const buildSceneModifier = (
     setProperty,
     getProperties,
     addOnClickedListener,
+    removeOnClickedListener,
   };
 
   return scene;
 };
 
-const useSceneModifier = (gltf: GLTF & ObjectMap, setOnClickListeners: Dispatch<SetStateAction<OnClickListener[]>>) => {
+const useSceneModifier = (gltf: GLTF & ObjectMap, setOnClickListeners: Dispatch<SetStateAction<OnClickListeners>>) => {
   const [scene, setScene] = useState<IScene>();
 
   useEffect(() => {

@@ -1,24 +1,20 @@
 import {
   DefaultLogger,
+  Engine,
   Graph,
-  GraphEvaluator,
   GraphJSON,
   ILifecycleEventEmitter,
   ILogger,
-  IScene,
-  ISmartContractActions,
   ManualLifecycleEventEmitter,
   NodeSpecJSON,
   readGraphFromJSON,
   registerCoreProfile,
-  registerSceneProfile,
   Registry,
-} from '@behavior-graph/framework';
-import { useFrame } from '@react-three/fiber';
+} from 'behave-graph';
 import { useEffect, useState } from 'react';
-import { Node, Edge } from 'reactflow';
-import { flowToBehave } from '../flowEditor/transformers/flowToBehave';
 import { getNodeSpecJSON } from '../flowEditor/util/getNodeSpecJSON';
+import { IScene, ISmartContractActions } from '../abstractions';
+import { registerSharedSceneProfiles, registerSpecificSceneProfiles } from './profiles';
 
 export const useRegistry = ({
   scene,
@@ -29,7 +25,7 @@ export const useRegistry = ({
 }) => {
   const [registry, setRegistry] = useState<Registry>();
 
-  const [lifecyleEmitter] = useState<ILifecycleEventEmitter>(new ManualLifecycleEventEmitter());
+  const [lifecyleEmitter, setLifecycleEmitter] = useState<ILifecycleEventEmitter>(new ManualLifecycleEventEmitter());
   const [logger] = useState<ILogger>(new DefaultLogger());
 
   const [specJson, setSpecJson] = useState<NodeSpecJSON[]>();
@@ -37,59 +33,94 @@ export const useRegistry = ({
   useEffect(() => {
     if (!scene) return;
     const registry = new Registry();
+    const lifecyleEmitter = new ManualLifecycleEventEmitter();
     registerCoreProfile(registry, logger, lifecyleEmitter);
-    registerSceneProfile(registry, lifecyleEmitter, scene, smartContractActions);
+    registerSharedSceneProfiles(registry, scene);
+    registerSpecificSceneProfiles(registry, scene, smartContractActions);
     const specJson = getNodeSpecJSON(registry);
 
     setRegistry(registry);
     setSpecJson(specJson);
-  }, [scene]);
+    setLifecycleEmitter(lifecyleEmitter);
+  }, [scene, smartContractActions, logger]);
 
   return { registry, specJson, lifecyleEmitter, logger };
 };
 
-export function buildGraphEvaluator({ graphJson, registry }: { graphJson: GraphJSON; registry: Registry }) {
-  const graph = readGraphFromJSON(graphJson, registry);
-
-  const graphEvaluator = new GraphEvaluator(graph);
-
-  return graphEvaluator;
-}
-
-export const useGraphEvaluator = ({
-  registry,
-  graph,
-  eventEmitter,
-}: {
-  registry: Registry | undefined;
-  graph: Graph | undefined;
-  eventEmitter: ILifecycleEventEmitter;
-}) => {
-  const [graphEvaluator, setGraphEvaluator] = useState<GraphEvaluator>();
-  const [manualLifecycleEventEmitter, setManualLifeCycleEventEmitter] = useState<ManualLifecycleEventEmitter>();
+export const useGraph = (graphJson: GraphJSON | undefined, registry: Registry | undefined) => {
+  const [graph, setGraph] = useState<Graph>();
 
   useEffect(() => {
-    if (!registry || !graph) return;
+    if (!graphJson || !registry) {
+      setGraph(undefined);
+      return;
+    }
 
-    const graphEvaluator = new GraphEvaluator(graph);
-    graphEvaluator.executeAllSync();
+    setGraph(readGraphFromJSON(graphJson, registry));
+  }, [graphJson, registry]);
+
+  return graph;
+};
+
+export const useSceneModificationEngine = ({
+  graphJson,
+  registry,
+  eventEmitter,
+  run,
+}: {
+  graphJson: GraphJSON | undefined;
+  registry: Registry | undefined;
+  eventEmitter: ILifecycleEventEmitter;
+  run: boolean;
+}) => {
+  const [engine, setEngine] = useState<Engine>();
+
+  useEffect(() => {
+    if (!graphJson || !registry || !run) return;
+
+    const graph = readGraphFromJSON(graphJson, registry);
+    const engine = new Engine(graph);
+
+    setEngine(engine);
+
+    return () => {
+      engine.dispose();
+      setEngine(undefined);
+    };
+  }, [graphJson, registry, run]);
+
+  useEffect(() => {
+    if (!engine || !run) return;
+
+    engine.executeAllSync();
+
+    let timeout: number;
+
+    const onTick = async () => {
+      eventEmitter.tickEvent.emit();
+
+      // eslint-disable-next-line no-await-in-loop
+      await engine.executeAllAsync(500);
+
+      timeout = window.setTimeout(onTick, 50);
+    };
 
     (async () => {
       if (eventEmitter.startEvent.listenerCount > 0) {
         eventEmitter.startEvent.emit();
 
-        await graphEvaluator.executeAllAsync(5);
+        await engine.executeAllAsync(5);
+      } else {
+        console.log('has no listener count');
       }
-      setGraphEvaluator(graphEvaluator);
-      setManualLifeCycleEventEmitter(eventEmitter);
+      onTick();
     })();
-  }, [eventEmitter, graph, registry]);
 
-  useFrame(async () => {
-    if (!manualLifecycleEventEmitter || !graphEvaluator) return;
+    return () => {
+      console.log('clear timeout');
+      window.clearTimeout(timeout);
+    };
+  }, [eventEmitter, engine, run]);
 
-    manualLifecycleEventEmitter.tickEvent.emit();
-
-    await graphEvaluator.executeAllAsync(500);
-  });
+  return engine;
 };

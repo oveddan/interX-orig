@@ -1,4 +1,4 @@
-import { GraphJSON } from '@behavior-graph/framework';
+import { GraphJSON } from 'behave-graph';
 import { CIDString } from 'web3.storage';
 import { makeWeb3StorageClient } from './web3Storage';
 

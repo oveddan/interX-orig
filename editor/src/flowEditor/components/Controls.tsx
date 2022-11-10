@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LoadModal } from './LoadModal';
 import { SaveModal } from './SaveModal';
 import { Controls, ControlButton } from 'reactflow';
-import { NodeSpecJSON } from '@behavior-graph/framework';
+import { NodeSpecJSON } from 'behave-graph';
 
 const CustomControls = ({
   toggleRun,

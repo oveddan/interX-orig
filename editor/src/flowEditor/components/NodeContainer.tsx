@@ -1,4 +1,4 @@
-import { NodeSpecJSON } from '@behavior-graph/framework';
+import { NodeSpecJSON } from 'behave-graph';
 import { PropsWithChildren } from 'react';
 import cx from 'classnames';
 
