@@ -155,6 +155,7 @@ function Flow({
           filters={filters}
           onPickNode={handleAddNode}
           onClose={closeNodePicker}
+          specJson={specJson}
         />
       )}
     </ReactFlow>
