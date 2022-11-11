@@ -10,7 +10,7 @@ This respository import's Ben Houston's [behave-graph](https://github.com/bhoust
 
 This was made for the [EthGlobal Eth Sanfrancisco hackathon](https://sf.ethglobal.com/), and won Polygon's Best Metaverse or Gaming prize and SKALE's Best Metaverse, Gaming, or NFTs prize.
 
-The [Eth Sanfrancisco] project page can be found [here](https://ethglobal.com/events/ethsanfrancisco2022/home)
+The Eth Sanfrancisco project page can be found [here](https://ethglobal.com/events/ethsanfrancisco2022/home)
 
 ## Organization
 
