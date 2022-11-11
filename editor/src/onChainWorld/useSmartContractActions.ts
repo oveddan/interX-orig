@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useContract, useContractEvent, useContractWrite, usePrepareContractWrite, useSigner } from 'wagmi';
+import { useContract, useContractEvent, useSigner } from 'wagmi';
 import { abi } from '../contracts/abi';
 import { BigNumber } from 'ethers';
-import { ISmartContractActions } from 'behave-graph';
+import { ISmartContractActions } from '../abstractions';
 
 type hn = { [id: string]: (count: number) => void };
 
@@ -52,6 +52,10 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
     actionExecutedHandlers.current[id] = cb;
   }, []);
 
+  const unRegisterTriggerHandler = useCallback((id: string, cb: (count: number) => void) => {
+    delete actionExecutedHandlers.current[id];
+  }, []);
+
   const invoke = useCallback(
     async (actionId: string, connectedContract: typeof contract) => {
       if (!connectedContract) return;
@@ -70,10 +74,11 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
         invoke(actionId, connectedContract);
       },
       registerTriggerHandler,
+      unRegisterTriggerHandler,
     };
 
     return result;
-  }, [invoke, registerTriggerHandler, connectedContract]);
+  }, [invoke, registerTriggerHandler, unRegisterTriggerHandler, connectedContract]);
 
   return smartContractAction;
 };
