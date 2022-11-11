@@ -1,17 +1,16 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import FlowEditor from './flowEditor/FlowEditorApp';
-import { useSceneModificationEngine, useGraph, useRegistry } from './hooks/behaviorFlow';
+import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
 // import rawGraphJSON from './exampleGraphs/ClickToAnimate.json';
 import rawGraphJSON from './exampleGraphs/SpinningSuzanne.json';
 import { GraphJSON } from 'behave-graph';
-import { behaveToFlow } from './flowEditor/transformers/behaveToFlow';
-import { useEdgesState, useNodesState } from 'reactflow';
 import '@rainbow-me/rainbowkit/styles.css';
 import { flowToBehave } from './flowEditor/transformers/flowToBehave';
 import useTokenContractAddress from './web3/useTokenContractAddressAndAbi';
 import useLoadSceneAndRegistry from './hooks/useLoadSceneAndRegistry';
 import Nav, { modelOptions } from './nav/Nav';
+import { useBehaveToFlow } from './hooks/useBehaveToFlow';
 
 function EditorAndScene({
   modelUrl,
@@ -25,9 +24,8 @@ function EditorAndScene({
   const { sceneJson, scene, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
     modelUrl,
   });
-  const [initialNodes, initialEdges] = useMemo(() => behaveToFlow(rawGraphJSON), [rawGraphJSON]);
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+
+  const { nodes, edges, onNodesChange, onEdgesChange } = useBehaveToFlow(rawGraphJSON);
 
   const [run, setRun] = useState(false);
 

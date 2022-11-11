@@ -1,8 +1,8 @@
 import { GraphJSON } from 'behave-graph';
 import { useGLTF } from '@react-three/drei';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useSceneModificationEngine, useGraph } from '../hooks/behaviorFlow';
+import { useParams } from 'react-router-dom';
+import { useSceneModificationEngine } from '../hooks/behaviorFlow';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
 import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
 import Web3Login from '../nav/Web3Login';
@@ -22,16 +22,16 @@ const OnChainWorld = ({
   smartContractActions: ISmartContractActions;
   tokenId: number;
 }) => {
-  const { sceneJson, scene, sceneOnClickListeners, registry, lifecyleEmitter } = useLoadSceneAndRegistry({
+  const { sceneJson, sceneOnClickListeners, registry, lifecyleEmitter } = useLoadSceneAndRegistry({
     modelUrl: sceneFileUrl,
     smartContractActions,
   });
 
-  const graph = useGraph(graphJson, registry);
-
-  const engine = useSceneModificationEngine({
-    graph,
+  useSceneModificationEngine({
+    graphJson,
     eventEmitter: lifecyleEmitter,
+    registry,
+    run: true,
   });
 
   return (
@@ -53,13 +53,7 @@ const OnChainWorld = ({
       </nav>
 
       <div className="w-full h-full">
-        <Scene
-          scene={sceneJson}
-          engine={engine}
-          lifecycleEmitter={lifecyleEmitter}
-          run
-          onClickListeners={sceneOnClickListeners}
-        />
+        <Scene scene={sceneJson} onClickListeners={sceneOnClickListeners} />
       </div>
     </>
   );
