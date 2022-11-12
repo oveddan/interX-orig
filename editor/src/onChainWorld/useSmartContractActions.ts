@@ -7,10 +7,6 @@ import { ISmartContractActions } from '../abstractions';
 type hn = { [id: string]: (count: number) => void };
 
 const useSmartContractActions = (contractAddress: string, tokenId: number) => {
-  const [activeActionId, setActiveActionId] = useState<string>('');
-
-  const args = useMemo(() => [tokenId, activeActionId], [tokenId, activeActionId]);
-
   const { data: signer } = useSigner();
 
   const contract = useContract({
@@ -42,11 +38,6 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
       if (handler) handler(actionCount.toNumber());
     },
   });
-  // address: contractAddress,
-  // abi,
-  // functionName: 'executeAction',
-  // on
-  // });
 
   const registerTriggerHandler = useCallback((id: string, cb: (count: number) => void) => {
     actionExecutedHandlers.current[id] = cb;

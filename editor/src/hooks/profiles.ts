@@ -17,7 +17,8 @@ import { GetSceneProperty } from 'behave-graph/dist/lib/Profiles/Scene/Queries/G
 import { registerSerializersForValueType } from 'behave-graph/dist/lib/Profiles/Core/registerSerializersForValueType';
 import { IScene, ISmartContractActions } from '../abstractions';
 import { OnSceneNodeClick } from '../scene/OnSceneNodeClick';
-import { TokenGate } from '../scene/TokenGate';
+import { TokenGatedActionInvoker } from '../scene/TokenGatedActionInvoker';
+import { OnSmartActionInvoked } from '../scene/OnSmartActionInvoked';
 
 export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
   const { values, nodes } = registry;
@@ -60,10 +61,11 @@ export function registerSpecificSceneProfiles(registry: Registry, scene: IScene)
   nodes.register(OnSceneNodeClick.Description(scene));
 }
 
-export function registerSmartContractActions(registry: Registry, actions: ISmartContractActions | undefined) {
+export function registerSmartContractActions(registry: Registry, actions: ISmartContractActions) {
   const { nodes } = registry;
 
   // TODO: register scene node types with IScene.
 
-  nodes.register(TokenGate.Description(actions));
+  nodes.register(TokenGatedActionInvoker.Description(actions));
+  nodes.register(OnSmartActionInvoked.Description(actions));
 }

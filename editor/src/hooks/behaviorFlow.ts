@@ -21,7 +21,7 @@ export const useRegistry = ({
   smartContractActions,
 }: {
   scene: IScene | undefined;
-  smartContractActions?: ISmartContractActions;
+  smartContractActions: ISmartContractActions;
 }) => {
   const [registry, setRegistry] = useState<Registry>();
 

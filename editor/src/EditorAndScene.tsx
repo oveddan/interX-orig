@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import FlowEditor from './flowEditor/FlowEditorApp';
 import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
@@ -11,6 +11,7 @@ import useTokenContractAddress from './web3/useTokenContractAddressAndAbi';
 import useLoadSceneAndRegistry from './hooks/useLoadSceneAndRegistry';
 import Nav, { modelOptions } from './nav/Nav';
 import { useBehaveToFlow } from './hooks/useBehaveToFlow';
+import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
 
 function EditorAndScene({
   modelUrl,
@@ -21,8 +22,10 @@ function EditorAndScene({
   rawGraphJSON: GraphJSON;
   setModelUrl: (url: string) => void;
 }) {
+  const smartContractActions = useMockSmartContractActions();
   const { sceneJson, scene, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
     modelUrl,
+    smartContractActions,
   });
 
   const { nodes, edges, onNodesChange, onEdgesChange } = useBehaveToFlow(rawGraphJSON);

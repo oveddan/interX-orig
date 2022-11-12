@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite } from 'wagmi';
 import { saveInteractiveWorldToIpfs } from './ipfs/ipfsInteractiveWorldSaver';
 import { abi } from '../contracts/abi';
-import { PrepareWriteContractConfig } from '@wagmi/core';
+import { smartContractInvokedActionName } from '../scene/TokenGatedActionInvoker';
 
 type TokenizedAction = {
   nodeType: number;
@@ -14,15 +14,15 @@ type TokenizedAction = {
   };
 };
 
-export const tokenizableActionTypes: string[] = ['scene/nodeClick'];
+export const tokenizableActionTypes: string[] = [smartContractInvokedActionName];
 
 const actionsToSmartContractActions = (behaviorGraph: GraphJSON, contractAddress: string): TokenizedAction[] => {
   const validNodes = behaviorGraph.nodes?.filter((x) => tokenizableActionTypes.includes(x.type));
 
   const result: TokenizedAction[] =
     validNodes?.map((x): TokenizedAction => {
-      const activeParam = x.parameters?.tokenGated as NodeParameterValueJSON | undefined;
-      const active = !!activeParam?.value;
+      const tokenGatedParam = x.parameters?.tokenGated as NodeParameterValueJSON | undefined;
+      const active = !!tokenGatedParam?.value;
       const addressParam = x.parameters?.tokenGatedAddress as NodeParameterValueJSON | undefined;
       const address = addressParam?.value;
       return {
