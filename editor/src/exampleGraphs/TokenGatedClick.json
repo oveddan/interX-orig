@@ -1,0 +1,133 @@
+{
+  "nodes": [
+    {
+      "id": "0a8f4ddb-f5f6-43c8-af84-e6e7b829a6ef",
+      "type": "math/subtract/integer",
+      "metadata": {
+        "positionX": "603.0899770990109",
+        "positionY": "-318.7901493172638"
+      },
+      "parameters": {
+        "a": {
+          "value": "1"
+        },
+        "b": {
+          "link": {
+            "nodeId": "45fe6cfe-9b6a-40bb-bfa8-ceb45d5104f2",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "1cc6a160-e28f-4b41-b778-9658a6240d65",
+      "type": "math/equal/integer",
+      "metadata": {
+        "positionX": "793.9001302853388",
+        "positionY": "-318.43534426861027"
+      },
+      "parameters": {
+        "b": {
+          "value": "1"
+        },
+        "a": {
+          "link": {
+            "nodeId": "0a8f4ddb-f5f6-43c8-af84-e6e7b829a6ef",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "45fe6cfe-9b6a-40bb-bfa8-ceb45d5104f2",
+      "type": "math/modulus/integer",
+      "metadata": {
+        "positionX": "421.9101484108573",
+        "positionY": "-319.232057004601"
+      },
+      "parameters": {
+        "b": {
+          "value": "2"
+        },
+        "a": {
+          "link": {
+            "nodeId": "5cacb533-3c2d-4ae2-9503-f6a88925b06e",
+            "socket": "count"
+          }
+        }
+      }
+    },
+    {
+      "id": "5cacb533-3c2d-4ae2-9503-f6a88925b06e",
+      "type": "smartContract/actionInvoked",
+      "metadata": {
+        "positionX": "161.88613244780666",
+        "positionY": "-473.82109091315226"
+      },
+      "parameters": {
+        "actionName": {
+          "value": "MyAction"
+        }
+      },
+      "flows": {
+        "flow": {
+          "nodeId": "00f8bce9-0ec6-4fb3-9ad7-ac7354194a52",
+          "socket": "flow"
+        }
+      }
+    },
+    {
+      "id": "810b160b-3c33-4da9-9cf7-8d60905d31bf",
+      "type": "smartContract/invokeTokenGatedAction",
+      "metadata": {
+        "positionX": "166.15007488129163",
+        "positionY": "-671.213207555163"
+      },
+      "parameters": {
+        "actionName": {
+          "value": "MyAction"
+        }
+      }
+    },
+    {
+      "id": "00f8bce9-0ec6-4fb3-9ad7-ac7354194a52",
+      "type": "scene/set/boolean",
+      "metadata": {
+        "positionX": "981.2063648348909",
+        "positionY": "-463.86097510053276"
+      },
+      "parameters": {
+        "jsonPath": {
+          "value": "nodes/Suzanne/visible"
+        },
+        "value": {
+          "link": {
+            "nodeId": "1cc6a160-e28f-4b41-b778-9658a6240d65",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "38415624-878a-4030-9899-0c9951013d1c",
+      "type": "scene/nodeClick",
+      "metadata": {
+        "positionX": "-196.30883415279038",
+        "positionY": "-673.0462071620772"
+      },
+      "parameters": {
+        "jsonPath": {
+          "value": "nodes/Torus"
+        }
+      },
+      "flows": {
+        "flow": {
+          "nodeId": "810b160b-3c33-4da9-9cf7-8d60905d31bf",
+          "socket": "flow"
+        }
+      }
+    }
+  ],
+  "variables": [],
+  "customEvents": []
+}

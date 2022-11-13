@@ -1,12 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useReactFlow, XYPosition } from 'reactflow';
 import { useOnPressKey } from '../hooks/useOnPressKey';
-import rawSpecJson from 'behave-graph/dist/node-spec.json';
 import { NodeSpecJSON } from 'behave-graph';
-
-const specJSON = rawSpecJson as NodeSpecJSON[];
-
-const nodes = specJSON;
 
 export type NodePickerFilters = {
   handleType: 'source' | 'target';
@@ -18,26 +13,33 @@ type NodePickerProps = {
   filters?: NodePickerFilters;
   onPickNode: (type: string, position: XYPosition) => void;
   onClose: () => void;
+  specJson: NodeSpecJSON[];
 };
 
-const NodePicker = ({ position, onPickNode, onClose, filters }: NodePickerProps) => {
+const NodePicker = ({ position, onPickNode, onClose, filters, specJson }: NodePickerProps) => {
   const [search, setSearch] = useState('');
   const instance = useReactFlow();
 
   useOnPressKey('Escape', onClose);
 
-  let filtered = nodes;
-  if (filters !== undefined) {
-    filtered = filtered.filter((node) => {
-      const sockets = filters?.handleType === 'source' ? node.outputs : node.inputs;
-      return sockets.some((socket) => socket.valueType === filters?.valueType);
-    });
-  }
+  const [filtered, setFiltered] = useState<NodeSpecJSON[]>([]);
 
-  filtered = filtered.filter((node) => {
-    const term = search.toLowerCase();
-    return node.type.toLowerCase().includes(term);
-  });
+  useEffect(() => {
+    let filtered = [...specJson];
+    if (filters !== undefined) {
+      filtered = filtered.filter((node) => {
+        const sockets = filters?.handleType === 'source' ? node.outputs : node.inputs;
+        return sockets.some((socket) => socket.valueType === filters?.valueType);
+      });
+    }
+
+    filtered = filtered.filter((node) => {
+      const term = search.toLowerCase();
+      return node.type.toLowerCase().includes(term);
+    });
+
+    setFiltered(filtered);
+  }, [specJson, filters, search]);
 
   return (
     <div

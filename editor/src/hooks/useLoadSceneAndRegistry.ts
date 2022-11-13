@@ -9,7 +9,7 @@ const useLoadSceneAndRegistry = ({
   smartContractActions,
 }: {
   modelUrl: string;
-  smartContractActions?: ISmartContractActions;
+  smartContractActions: ISmartContractActions;
 }) => {
   const sceneJson = useGLTF(modelUrl);
 

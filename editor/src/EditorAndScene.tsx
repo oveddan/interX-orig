@@ -1,9 +1,8 @@
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import FlowEditor from './flowEditor/FlowEditorApp';
 import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
-// import rawGraphJSON from './exampleGraphs/ClickToAnimate.json';
-import rawGraphJSON from './exampleGraphs/SpinningSuzanne.json';
+import rawGraphJSON from './exampleGraphs/TokenGatedClick.json';
 import { GraphJSON } from 'behave-graph';
 import '@rainbow-me/rainbowkit/styles.css';
 import { flowToBehave } from './flowEditor/transformers/flowToBehave';
@@ -11,6 +10,7 @@ import useTokenContractAddress from './web3/useTokenContractAddressAndAbi';
 import useLoadSceneAndRegistry from './hooks/useLoadSceneAndRegistry';
 import Nav, { modelOptions } from './nav/Nav';
 import { useBehaveToFlow } from './hooks/useBehaveToFlow';
+import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
 
 function EditorAndScene({
   modelUrl,
@@ -21,8 +21,10 @@ function EditorAndScene({
   rawGraphJSON: GraphJSON;
   setModelUrl: (url: string) => void;
 }) {
+  const smartContractActions = useMockSmartContractActions();
   const { sceneJson, scene, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
     modelUrl,
+    smartContractActions,
   });
 
   const { nodes, edges, onNodesChange, onEdgesChange } = useBehaveToFlow(rawGraphJSON);
@@ -79,6 +81,9 @@ function EditorAndScene({
   );
 }
 
+// @ts-ignore
+const graphJson = rawGraphJSON as GraphJSON;
+
 function EditorAndSceneWrapper() {
   const [modelUrl, setModelUrl] = useState(() => modelOptions[0]);
 
@@ -97,7 +102,7 @@ function EditorAndSceneWrapper() {
 
   return (
     <Suspense fallback={null}>
-      <EditorAndScene modelUrl={modelUrl} rawGraphJSON={rawGraphJSON as GraphJSON} setModelUrl={updateUrl} />
+      <EditorAndScene modelUrl={modelUrl} rawGraphJSON={graphJson} setModelUrl={updateUrl} />
     </Suspense>
   );
 }

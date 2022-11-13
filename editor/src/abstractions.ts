@@ -1,7 +1,7 @@
 export interface ISmartContractActions {
   invoke: (id: string) => void;
-  registerTriggerHandler: (id: string, cb: (count: number) => void) => void;
-  unRegisterTriggerHandler: (id: string, cb: (count: number) => void) => void;
+  registerTriggerHandler: (id: string, cb: (count: bigint) => void) => void;
+  unRegisterTriggerHandler: (id: string, cb: (count: bigint) => void) => void;
 }
 
 export type ResourceProperties = { names: string[]; properties: string[] };

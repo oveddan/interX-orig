@@ -14,14 +14,14 @@ import {
 import { useEffect, useState } from 'react';
 import { getNodeSpecJSON } from '../flowEditor/util/getNodeSpecJSON';
 import { IScene, ISmartContractActions } from '../abstractions';
-import { registerSharedSceneProfiles, registerSpecificSceneProfiles } from './profiles';
+import { registerSharedSceneProfiles, registerSmartContractActions, registerSpecificSceneProfiles } from './profiles';
 
 export const useRegistry = ({
   scene,
   smartContractActions,
 }: {
   scene: IScene | undefined;
-  smartContractActions?: ISmartContractActions;
+  smartContractActions: ISmartContractActions;
 }) => {
   const [registry, setRegistry] = useState<Registry>();
 
@@ -36,7 +36,8 @@ export const useRegistry = ({
     const lifecyleEmitter = new ManualLifecycleEventEmitter();
     registerCoreProfile(registry, logger, lifecyleEmitter);
     registerSharedSceneProfiles(registry, scene);
-    registerSpecificSceneProfiles(registry, scene, smartContractActions);
+    registerSpecificSceneProfiles(registry, scene);
+    registerSmartContractActions(registry, smartContractActions);
     const specJson = getNodeSpecJSON(registry);
 
     setRegistry(registry);

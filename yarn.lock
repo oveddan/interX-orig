@@ -3990,10 +3990,10 @@ bech32@1.1.4:
   resolved "https://registry.yarnpkg.com/bech32/-/bech32-1.1.4.tgz#e38c9f37bf179b8eb16ae3a772b40c356d4832e9"
   integrity sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ==
 
-behave-graph@^0.9.5:
-  version "0.9.5"
-  resolved "https://registry.yarnpkg.com/behave-graph/-/behave-graph-0.9.5.tgz#b2557895489baf887342ec2ad5ca12d1d424bdf5"
-  integrity sha512-ov4FEabt1v6eNZtvXKhK5ezmcP4NvPSH7n6RjnE96s5omKBHEx2nfrXS7ruYeFlr+GJISEt9mectQ9jDJiFmkw==
+behave-graph@^0.9.10:
+  version "0.9.10"
+  resolved "https://registry.yarnpkg.com/behave-graph/-/behave-graph-0.9.10.tgz#55fc7da9492a3fe65d27683d8a4fa6abf7edc51d"
+  integrity sha512-Npul42y0f4lHPyRz0O2ex3Ho7hxVJLN4xY3SmUMoRmlF79SVXLSkCTTl6sxgXRFq1+7LopfQuWBDAoAH7eL79A==
 
 bidi-js@^1.0.2:
   version "1.0.2"

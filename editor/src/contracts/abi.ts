@@ -279,6 +279,30 @@ export const abi = [
         "type": "uint256"
       },
       {
+        "internalType": "string",
+        "name": "_nodeId",
+        "type": "string"
+      }
+    ],
+    "name": "getActionCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
         "internalType": "string[]",
         "name": "_nodeIds",
         "type": "string[]"
