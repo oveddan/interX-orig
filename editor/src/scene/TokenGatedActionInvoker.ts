@@ -4,6 +4,8 @@ import { ISmartContractActions } from '../abstractions';
 
 export const smartContractInvokedActionName = 'smartContract/invokeTokenGatedAction';
 export const actionNameParamName = 'actionName';
+export const tokenGatedParamName = 'tokenGated';
+export const togenGatedAddressParamName = 'tokenGatedAddress';
 
 export class TokenGatedActionInvoker extends FlowNode {
   public static Description = (smartContractActions: ISmartContractActions) =>
@@ -21,8 +23,8 @@ export class TokenGatedActionInvoker extends FlowNode {
       [
         new Socket('flow', 'flow'),
         new Socket('string', actionNameParamName),
-        new Socket('boolean', 'tokenGated'),
-        new Socket('string', 'tokenGatedAddress'),
+        new Socket('boolean', tokenGatedParamName),
+        new Socket('string', togenGatedAddressParamName),
       ],
       []
     );

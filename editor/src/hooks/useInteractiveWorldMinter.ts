@@ -1,9 +1,14 @@
-import { GraphJSON, NodeParameterValueJSON } from 'behave-graph';
+import { GraphJSON, NodeParameterJSON, NodeParametersJSON, NodeParameterValueJSON } from 'behave-graph';
 import { useCallback, useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite } from 'wagmi';
 import { saveInteractiveWorldToIpfs } from './ipfs/ipfsInteractiveWorldSaver';
 import { abi } from '../contracts/abi';
-import { smartContractInvokedActionName } from '../scene/TokenGatedActionInvoker';
+import {
+  actionNameParamName,
+  smartContractInvokedActionName,
+  togenGatedAddressParamName,
+  tokenGatedParamName,
+} from '../scene/TokenGatedActionInvoker';
 
 type TokenizedAction = {
   nodeType: number;
@@ -16,24 +21,34 @@ type TokenizedAction = {
 
 export const tokenizableActionTypes: string[] = [smartContractInvokedActionName];
 
+const getParam = (x: NodeParametersJSON | undefined, paramName: string) => {
+  if (!x) return undefined;
+
+  const paramAndValue = x[paramName] as NodeParameterValueJSON | undefined;
+
+  return paramAndValue?.value;
+};
+
 const actionsToSmartContractActions = (behaviorGraph: GraphJSON, contractAddress: string): TokenizedAction[] => {
   const validNodes = behaviorGraph.nodes?.filter((x) => tokenizableActionTypes.includes(x.type));
 
-  const result: TokenizedAction[] =
-    validNodes?.map((x): TokenizedAction => {
-      const tokenGatedParam = x.parameters?.tokenGated as NodeParameterValueJSON | undefined;
-      const active = !!tokenGatedParam?.value;
-      const addressParam = x.parameters?.tokenGatedAddress as NodeParameterValueJSON | undefined;
-      const address = addressParam?.value;
-      return {
-        id: x.id,
-        nodeType: 0,
-        tokenGateRule: {
-          active,
-          tokenContract: address as `0x${string}`,
-        },
-      };
-    }) || [];
+  const result: TokenizedAction[] = validNodes?.map((x): TokenizedAction => {
+    const parameters = x.parameters;
+    const actionName = getParam(parameters, actionNameParamName) as string | undefined;
+    const active = !!getParam(parameters, tokenGatedParamName);
+    const address = getParam(parameters, togenGatedAddressParamName) as `0x${string}` | undefined;
+
+    if (!actionName) throw new Error(`actionName: ${actionName}  must not be null`);
+
+    return {
+      id: actionName,
+      nodeType: 0,
+      tokenGateRule: {
+        active,
+        tokenContract: address || (contractAddress as `0x${string}`),
+      },
+    };
+  }) || [contractAddress];
 
   return result;
 };
@@ -80,11 +95,18 @@ const useInteractiveWorldMinter = ({
   });
 
   useEffect(() => {
-    setArgs(toMintArgs(worldCid, behaviorGraph, contractAddress));
+    const args = toMintArgs(worldCid, behaviorGraph, contractAddress);
+    console.log({ args });
+    setArgs(args);
   }, [worldCid, behaviorGraph, contractAddress]);
 
   const { data, isLoading, isSuccess, write } = useContractWrite({
     ...config,
+  });
+
+  console.log({
+    error,
+    isError,
   });
 
   return { write, isSuccess, isLoading, isError, error };

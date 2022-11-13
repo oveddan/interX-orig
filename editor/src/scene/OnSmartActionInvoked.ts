@@ -30,12 +30,12 @@ export class OnSmartActionInvoked extends EventNode {
 
   private jsonPath: string | undefined;
 
-  private sendData = (engine: Engine, count: number) => {
+  private sendData = (engine: Engine, count: bigint) => {
     engine.commitToNewFiber(this, 'flow');
     this.writeOutput('count', count);
   };
 
-  private handleActionInvoked: ((count: number) => void) | undefined = undefined;
+  private handleActionInvoked: ((count: bigint) => void) | undefined = undefined;
 
   private getTriggeredActionName() {
     const triggerdActionName = this.readInput(actionNameParamName) as string;
@@ -52,7 +52,7 @@ export class OnSmartActionInvoked extends EventNode {
 
     this.jsonPath = triggeredNodeId;
 
-    this.handleActionInvoked = (count: number) => {
+    this.handleActionInvoked = (count: bigint) => {
       this.sendData(engine, count);
     };
 

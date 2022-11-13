@@ -1,18 +1,18 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { ISmartContractActions } from '../abstractions';
 
-type hn = { [id: string]: (count: number) => void };
+type hn = { [id: string]: (count: bigint) => void };
 
 const useMockSmartContractActions = () => {
   const actionExecutedHandlers = useRef<hn>({});
 
   const mockCounts = useRef<{ [id: string]: number }>({});
 
-  const registerTriggerHandler = useCallback((id: string, cb: (count: number) => void) => {
+  const registerTriggerHandler = useCallback((id: string, cb: (count: bigint) => void) => {
     actionExecutedHandlers.current[id] = cb;
   }, []);
 
-  const unRegisterTriggerHandler = useCallback((id: string, cb: (count: number) => void) => {
+  const unRegisterTriggerHandler = useCallback((id: string, cb: (count: bigint) => void) => {
     delete actionExecutedHandlers.current[id];
   }, []);
 
@@ -22,7 +22,7 @@ const useMockSmartContractActions = () => {
 
     const handler = actionExecutedHandlers.current[actionId];
     if (handler) {
-      handler(newCount);
+      handler(BigInt(newCount));
     }
   }, []);
 
