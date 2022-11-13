@@ -71,6 +71,7 @@ const useSmartContractActions = (contractAddress: string, tokenId: number) => {
   const registerTriggerHandler = useCallback(
     async (id: string, cb: (count: bigint) => void) => {
       actionExecutedHandlers.current[id] = cb;
+      if (!connectedContract) return;
       console.log('setting trigger handler', actionExecutedHandlers.current);
 
       const actionCount = await getActionCount(id, connectedContract);

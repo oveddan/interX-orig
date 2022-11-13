@@ -1,7 +1,7 @@
 import { Graph, Socket, Engine, Assert } from 'behave-graph';
 import { EventNode } from 'behave-graph/dist/lib/Nodes/EventNode';
 import { NodeDescription } from 'behave-graph/dist/lib/Nodes/Registry/NodeDescription';
-import { ISmartContractActions } from '../abstractions';
+import { ISmartContractActions } from '../../abstractions';
 import { actionNameParamName } from './TokenGatedActionInvoker';
 
 const smartActionInvokedTypeName = 'smartContract/actionInvoked';

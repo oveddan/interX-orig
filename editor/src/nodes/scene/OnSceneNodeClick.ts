@@ -1,7 +1,7 @@
 import { Graph, Socket, Engine, Assert } from 'behave-graph';
 import { EventNode } from 'behave-graph/dist/lib/Nodes/EventNode';
 import { NodeDescription } from 'behave-graph/dist/lib/Nodes/Registry/NodeDescription';
-import { IScene } from '../abstractions';
+import { IScene } from '../../abstractions';
 
 // very 3D specific.
 export class OnSceneNodeClick extends EventNode {

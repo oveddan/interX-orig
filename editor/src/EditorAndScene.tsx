@@ -2,9 +2,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import FlowEditor from './flowEditor/FlowEditorApp';
 import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
-// import rawGraphJSON from './exampleGraphs/ClickToAnimate.json';
 import rawGraphJSON from './exampleGraphs/TokenGatedClick.json';
-// import rawGraphJSON from './exampleGraphs/SpinningSuzanne.json';
 import { GraphJSON } from 'behave-graph';
 import '@rainbow-me/rainbowkit/styles.css';
 import { flowToBehave } from './flowEditor/transformers/flowToBehave';
@@ -83,6 +81,9 @@ function EditorAndScene({
   );
 }
 
+// @ts-ignore
+const graphJson = rawGraphJSON as GraphJSON;
+
 function EditorAndSceneWrapper() {
   const [modelUrl, setModelUrl] = useState(() => modelOptions[0]);
 
@@ -101,7 +102,7 @@ function EditorAndSceneWrapper() {
 
   return (
     <Suspense fallback={null}>
-      <EditorAndScene modelUrl={modelUrl} rawGraphJSON={rawGraphJSON as GraphJSON} setModelUrl={updateUrl} />
+      <EditorAndScene modelUrl={modelUrl} rawGraphJSON={graphJson} setModelUrl={updateUrl} />
     </Suspense>
   );
 }

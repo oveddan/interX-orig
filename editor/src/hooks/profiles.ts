@@ -16,9 +16,9 @@ import { SetSceneProperty } from 'behave-graph/dist/lib/Profiles/Scene/Actions/S
 import { GetSceneProperty } from 'behave-graph/dist/lib/Profiles/Scene/Queries/GetSceneProperty';
 import { registerSerializersForValueType } from 'behave-graph/dist/lib/Profiles/Core/registerSerializersForValueType';
 import { IScene, ISmartContractActions } from '../abstractions';
-import { OnSceneNodeClick } from '../scene/OnSceneNodeClick';
-import { TokenGatedActionInvoker } from '../scene/TokenGatedActionInvoker';
-import { OnSmartActionInvoked } from '../scene/OnSmartActionInvoked';
+import { OnSceneNodeClick } from '../nodes/scene/OnSceneNodeClick';
+import { OnSmartActionInvoked } from '../nodes/smartContracts/OnSmartActionInvoked';
+import { TokenGatedActionInvoker } from '../nodes/smartContracts/TokenGatedActionInvoker';
 
 export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
   const { values, nodes } = registry;
