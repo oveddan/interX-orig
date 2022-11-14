@@ -1,6 +1,4 @@
 import { GraphJSON } from 'behave-graph';
-import { useGLTF } from '@react-three/drei';
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSceneModificationEngine } from '../hooks/behaviorFlow';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';

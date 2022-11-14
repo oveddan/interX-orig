@@ -4,31 +4,28 @@
       "id": "0",
       "type": "lifecycle/onTick",
       "metadata": {
-        "positionX": "-225",
-        "positionY": "-2"
+        "positionX": "-165.90476155191715",
+        "positionY": "-218.4686464000493"
       },
       "flows": {
         "flow": {
-          "nodeId": "3",
+          "nodeId": "4",
           "socket": "flow"
         }
       }
     },
     {
       "id": "1",
-      "type": "math/create/euler",
+      "type": "math/multiply/float",
       "metadata": {
-        "positionX": "78",
-        "positionY": "108"
+        "positionX": "-8.213107007520662",
+        "positionY": "-65.70485606016521"
       },
       "parameters": {
-        "y": {
-          "value": 0
+        "b": {
+          "value": 0.001
         },
-        "z": {
-          "value": 0
-        },
-        "x": {
+        "a": {
           "link": {
             "nodeId": "0",
             "socket": "time"
@@ -38,13 +35,19 @@
     },
     {
       "id": "2",
-      "type": "math/toQuat/euler",
+      "type": "math/toEuler/float",
       "metadata": {
-        "positionX": "307",
-        "positionY": "109"
+        "positionX": "159.33427594590063",
+        "positionY": "-65.70485606016521"
       },
       "parameters": {
-        "a": {
+        "x": {
+          "value": 0
+        },
+        "z": {
+          "value": 0
+        },
+        "y": {
           "link": {
             "nodeId": "1",
             "socket": "result"
@@ -54,10 +57,26 @@
     },
     {
       "id": "3",
+      "type": "math/toQuat/euler",
+      "metadata": {
+        "positionX": "343.25553939252865",
+        "positionY": "-75.26874090829736"
+      },
+      "parameters": {
+        "a": {
+          "link": {
+            "nodeId": "2",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "4",
       "type": "scene/set/quat",
       "metadata": {
-        "positionX": "563",
-        "positionY": "-85"
+        "positionX": "530.6063172331402",
+        "positionY": "-219"
       },
       "parameters": {
         "jsonPath": {
@@ -65,7 +84,7 @@
         },
         "value": {
           "link": {
-            "nodeId": "2",
+            "nodeId": "3",
             "socket": "result"
           }
         }
