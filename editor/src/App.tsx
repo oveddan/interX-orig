@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { client, chains } from './web3/client';
 import '@rainbow-me/rainbowkit/styles.css';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';

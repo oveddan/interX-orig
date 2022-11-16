@@ -2,7 +2,7 @@ import { ObjectMap } from '@react-three/fiber';
 import { Vec3, Vec4 } from 'behave-graph';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
-import { IScene, Properties } from '../abstractions';
+import { IScene, Properties, ResourceTypes } from '../abstractions';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import { GLTFJson } from './GLTFJson';
 
@@ -15,7 +15,6 @@ function toVec4(value: Vector4 | Quaternion): Vec4 {
 
 const shortPathRegEx = /^\/?(?<resource>[^/]+)\/(?<index>\d+)$/;
 const jsonPathRegEx = /^\/?(?<resource>[^/]+)\/(?<index>\d+)\/(?<property>[^/]+)$/;
-export type ResourceTypes = 'nodes' | 'materials';
 
 export type Optional<T> = {
   [K in keyof T]: T[K] | undefined;
@@ -29,10 +28,10 @@ export type Path = {
 
 export function toJsonPathString({ index, property, resource: resourceType }: Optional<Path>, short: boolean) {
   if (short) {
-    if (!resourceType || !index) return;
+    if (!resourceType || typeof index === undefined) return;
     return `${resourceType}/${index}`;
   } else {
-    if (!resourceType || !index || !property) return;
+    if (!resourceType || typeof index === undefined || !property) return;
     return `${resourceType}/${index}/${property}`;
   }
 }
@@ -45,17 +44,24 @@ export function parseJsonPath(jsonPath: string, short = false): Path {
   if (matches.groups === undefined) throw new Error(`can not parse jsonPath (no groups): ${jsonPath}`);
   return {
     resource: matches.groups.resource as ResourceTypes,
-    index: +matches.groups.name,
+    index: +matches.groups.index,
     property: matches.groups.property,
   };
 }
 
-function applyPropertyToModel({ resource, index: name, property }: Path, gltf: GLTF & ObjectMap, value: any) {
+function applyPropertyToModel(
+  { resource, index, property }: Path,
+  gltf: GLTF & ObjectMap,
+  value: any,
+  properties: Properties
+) {
   if (resource === 'nodes') {
-    const node = gltf.nodes[name];
+    const nodeName = getResourceName({ resource, index }, properties);
+    if (!nodeName) throw new Error(`could not get node at index ${index}`);
+    const node = gltf.nodes[nodeName];
 
     if (!node) {
-      console.error(`no node at path ${name}`);
+      console.error(`no node at path ${nodeName}`);
       return;
     }
 
@@ -64,10 +70,12 @@ function applyPropertyToModel({ resource, index: name, property }: Path, gltf: G
     return;
   }
   if (resource === 'materials') {
-    const node = gltf.materials[name];
+    const nodeName = getResourceName({ resource, index }, properties);
+    if (!nodeName) throw new Error(`could not get node at index ${index}`);
+    const node = gltf.materials[nodeName];
 
     if (!node) {
-      console.error(`no node at path ${name}`);
+      console.error(`no node at path ${nodeName}`);
       return;
     }
 
@@ -79,12 +87,18 @@ function applyPropertyToModel({ resource, index: name, property }: Path, gltf: G
   console.error(`unknown resource type ${resource}`);
 }
 
-function getPropertyFromModel({ resource, index: name, property }: Path, gltf: GLTF & ObjectMap) {
+const getResourceName = ({ resource, index }: Pick<Path, 'resource' | 'index'>, properties: Properties) => {
+  return properties[resource]?.options[index].name;
+};
+
+const getPropertyFromModel = ({ resource, index, property }: Path, gltf: GLTF & ObjectMap, properties: Properties) => {
   if (resource === 'nodes') {
-    const node = gltf.nodes[name];
+    const nodeName = getResourceName({ resource, index }, properties);
+    if (!nodeName) throw new Error(`could not get node at index ${index}`);
+    const node = gltf.nodes[nodeName];
 
     if (!node) {
-      console.error(`no node at path ${name}`);
+      console.error(`no node at path ${nodeName}`);
       return;
     }
 
@@ -92,7 +106,7 @@ function getPropertyFromModel({ resource, index: name, property }: Path, gltf: G
 
     return;
   }
-}
+};
 
 function applyNodeModifier(property: string, objectRef: Object3D, value: any) {
   switch (property) {
@@ -151,6 +165,34 @@ function getPropertyValue(property: string, objectRef: Object3D) {
       throw new Error(`unrecognized property: ${property}`);
   }
 }
+
+const extractProperties = (gltf: GLTF): Properties => {
+  const nodeProperties = ['visible', 'translation', 'scale', 'rotation', 'color'];
+  const animationProperties = ['enabled'];
+  const materialProperties = ['color'];
+
+  const gltfJson = gltf.parser.json as GLTFJson;
+
+  const nodeOptions = gltfJson.nodes?.map(({ name }, index) => ({ name: name || index.toString(), index }));
+  const materialOptions = gltfJson.materials?.map(({ name }, index) => ({ name: name || index.toString(), index }));
+  const animationOptions = gltf.animations?.map(({ name }, index) => ({ name: name || index.toString(), index }));
+
+  const properties: Properties = {};
+
+  if (nodeOptions) {
+    properties.nodes = { options: nodeOptions, properties: nodeProperties };
+  }
+
+  if (materialOptions) {
+    properties.materials = { options: materialOptions, properties: materialProperties };
+  }
+
+  if (animationOptions) {
+    properties.animations = { options: animationOptions, properties: animationProperties };
+  }
+
+  return properties;
+};
 
 export type OnClickCallback = (jsonPath: string) => void;
 
@@ -223,36 +265,21 @@ const buildSceneModifier = (
     });
   };
 
+  const properties = extractProperties(gltf);
+
   const getProperty = (jsonPath: string, valueTypeName: string) => {
     const path = parseJsonPath(jsonPath);
 
-    return getPropertyFromModel(path, gltf);
+    return getPropertyFromModel(path, gltf, properties);
   };
 
   const setProperty = (jsonPath: string, valueTypeName: string, value: any) => {
     const path = parseJsonPath(jsonPath);
 
-    applyPropertyToModel(path, gltf, value);
+    applyPropertyToModel(path, gltf, value, properties);
   };
 
-  const getProperties = (): Properties => {
-    const nodeProperties = ['visible', 'translation', 'scale', 'rotation', 'color'];
-    const animationProperties = ['enabled'];
-    const materialProperties = ['color'];
-
-    const gltfJson = gltf.parser.json as GLTFJson;
-    const nodeOptions = gltfJson.nodes.map(({ name }, index) => ({ name: name || index.toString(), index }));
-    const materialOptions = gltfJson.materials.map(({ name }, index) => ({ name: name || index.toString(), index }));
-    const animationOptions = gltf.animations.map(({ name }, index) => ({ name: name || index.toString(), index }));
-
-    const properties: Properties = {
-      nodes: { options: nodeOptions, properties: nodeProperties },
-      animations: { options: animationOptions, properties: animationProperties },
-      materials: { options: materialOptions, properties: materialProperties },
-    };
-
-    return properties;
-  };
+  const getProperties = () => properties;
 
   const scene: IScene = {
     getProperty,

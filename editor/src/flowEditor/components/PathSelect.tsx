@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { parseJsonPath, Path, ResourceTypes, toJsonPathString } from '../../scene/useSceneModifier';
-import { IScene } from '../../abstractions';
+import { parseJsonPath, Path, toJsonPathString } from '../../scene/useSceneModifier';
+import { IScene, ResourceTypes } from '../../abstractions';
 
 const PathSelect = ({
   value,
@@ -11,7 +11,8 @@ const PathSelect = ({
   const [initialValue] = useState<Path | undefined>(() => {
     console.log('parsing:', value, short);
     if (value) {
-      return parseJsonPath(value, short);
+      const result = parseJsonPath(value, short);
+      return result;
     } else return;
   });
 
@@ -57,9 +58,9 @@ const PathSelect = ({
           className=" bg-gray-600 disabled:bg-gray-700 py-1 px-2 nodrag"
         >
           <option>--element--</option>
-          {properties[resourceType].options.map(({ name, index }) => (
+          {properties[resourceType]?.options.map(({ name, index }) => (
             <option value={index} key={name}>
-              {index}
+              {name}
             </option>
           ))}
         </select>
@@ -71,7 +72,7 @@ const PathSelect = ({
           className=" bg-gray-600 disabled:bg-gray-700 py-1 px-2 nodrag"
         >
           <option>-property-</option>
-          {properties[resourceType].properties.map((property) => (
+          {properties[resourceType]?.properties.map((property) => (
             <option value={property} key={property}>
               {property}
             </option>
