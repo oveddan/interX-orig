@@ -1,62 +1,132 @@
 import { GraphJSON } from 'behave-graph';
-import { FC, useState } from 'react';
+import { FC, useState, useEffect, useCallback, useMemo, CSSProperties } from 'react';
 import { useReactFlow } from 'reactflow';
-import { behaveToFlow } from '../transformers/behaveToFlow';
-import { autoLayout } from '../util/autoLayout';
-import { hasPositionMetaData } from '../util/hasPositionMetaData';
 import { Modal } from './Modal';
+import { useDropzone } from 'react-dropzone';
 
-import ClickToAnimate from '../../exampleGraphs/ClickToAnimate.json';
-import SpinningModel from '../../exampleGraphs/SpinningSuzanne.json';
-// import Branch from 'behave-graph/dist/graphs/core/flow/Branch.json';
-// import Delay from 'behave-graph/dist/graphs/core/async/Delay.json';
-// import HelloWorld from 'behave-graph/dist/graphs/core//HelloWorld.json';
-// import Polynomial from 'behave-graph/dist/graphs/core/logic/Polynomial.json';
-// import SetGet from 'behave-graph/dist/graphs/core/variables/SetGet.json';
+// import ClickToAnimate from '../../exampleGraphs/ClickToAnimate.json';
+// import SpinningModel from '../../exampleGraphs/SpinningSuzanne.json';
+import { dataUrlFromFile, emptyGraphJson, SaveAndLoadParams } from '../../hooks/useSaveAndLoad';
+import ModelPreview from '../../scene/ModelPreview';
 
-// TODO remove when json types fixed in @behavior-graph/framework
 const examples = {
-  clickToAnimate: ClickToAnimate as unknown as GraphJSON,
-  spinningModel: SpinningModel as unknown as GraphJSON,
+  // clickToAnimate: ClickToAnimate as unknown as GraphJSON,
+  // spinningModel: SpinningModel as unknown as GraphJSON,
 } as Record<string, GraphJSON>;
 
 export type LoadModalProps = {
   open?: boolean;
   onClose: () => void;
+} & Pick<SaveAndLoadParams, 'handleSetModelAndBehaviorGraph'>;
+
+const baseStyle = {
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding: '20px',
+  borderWidth: 2,
+  borderRadius: 2,
+  borderColor: '#eeeeee',
+  borderStyle: 'dashed',
+  backgroundColor: '#fafafa',
+  color: '#bdbdbd',
+  outline: 'none',
+  transition: 'border .24s ease-in-out',
 };
 
-export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose }) => {
+const focusedStyle = {
+  borderColor: '#2196f3',
+};
+
+const acceptStyle = {
+  borderColor: '#00e676',
+};
+
+const rejectStyle = {
+  borderColor: '#ff1744',
+};
+
+const useDropZoneStyle = ({
+  isFocused,
+  isDragAccept,
+  isDragReject,
+}: {
+  isFocused: boolean;
+  isDragAccept: boolean;
+  isDragReject: boolean;
+}) => {
+  const style = useMemo(
+    () => ({
+      ...baseStyle,
+      ...(isFocused ? focusedStyle : {}),
+      ...(isDragAccept ? acceptStyle : {}),
+      ...(isDragReject ? rejectStyle : {}),
+    }),
+    [isFocused, isDragAccept, isDragReject]
+  ) as CSSProperties;
+
+  return style;
+};
+
+export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSetModelAndBehaviorGraph }) => {
   const [value, setValue] = useState<string>();
   const [selected, setSelected] = useState('');
 
+  const [uploadedModelFile, setUploadedModelFile] = useState<File>();
+
   const instance = useReactFlow();
 
-  const handleLoad = () => {
-    let graph;
-    if (value !== undefined) {
-      graph = JSON.parse(value) as GraphJSON;
-    } else if (selected !== '') {
-      graph = examples[selected];
+  useEffect(() => {
+    // if reopening - clear the state
+    if (open) {
+      setUploadedModelFile(undefined);
+      setValue(undefined);
     }
+  }, [open]);
 
-    if (graph === undefined) return;
+  const handleLoad = useCallback(() => {
+    if (!uploadedModelFile) return;
+    const graph = value ? (JSON.parse(value) as GraphJSON) : emptyGraphJson();
 
-    const [nodes, edges] = behaveToFlow(graph);
+    (async () => {
+      const modelUrl = await dataUrlFromFile(uploadedModelFile);
 
-    if (hasPositionMetaData(graph) === false) {
-      autoLayout(nodes, edges);
-    }
+      handleSetModelAndBehaviorGraph({
+        graph,
+        modelFile: {
+          fileContents: modelUrl as string,
+          fileType: 'uploaded',
+          fileUrl: undefined,
+        },
+      });
 
-    instance.setNodes(nodes);
-    instance.setEdges(edges);
+      // TODO better way to call fit vew after edges render
+      setTimeout(() => {
+        instance.fitView();
+      }, 100);
 
-    // TODO better way to call fit vew after edges render
-    setTimeout(() => {
-      instance.fitView();
-    }, 100);
+      handleClose();
+    })();
+  }, [handleSetModelAndBehaviorGraph, value, uploadedModelFile]);
 
-    handleClose();
-  };
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return;
+
+    setUploadedModelFile(acceptedFiles[0]);
+  }, []);
+  const { getRootProps, getInputProps, isDragActive, isFocused, isDragAccept, isDragReject } = useDropzone({
+    onDrop,
+    accept: {
+      'model/glb': ['.glb', '.gltf'],
+    },
+  });
+
+  const style = useDropZoneStyle({
+    isDragAccept,
+    isDragReject,
+    isFocused,
+  });
 
   const handleClose = () => {
     setValue(undefined);
@@ -66,26 +136,41 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose }) => {
 
   return (
     <Modal
-      title="Load Graph"
+      title="Load Model and Behave Graph"
       actions={[
         { label: 'Cancel', onClick: handleClose },
         { label: 'Load', onClick: handleLoad },
       ]}
       open={open}
       onClose={onClose}
+      width="4/5"
     >
-      <textarea
-        autoFocus
-        className="border border-gray-300 w-full p-2 h-32 align-top"
-        placeholder="Paste JSON here"
-        value={value}
-        onChange={(e) => setValue(e.currentTarget.value)}
-      ></textarea>
+      <div className="grid grid-cols-2 w-full h-32">
+        {!uploadedModelFile && (
+          <div {...getRootProps({ style })}>
+            <input {...getInputProps()} />
+            {<p>Drag 'n' drop a gltf or glb model file here, or click to select a file</p>}
+          </div>
+        )}
+        {uploadedModelFile && (
+          <div>
+            <ModelPreview file={uploadedModelFile} />
+          </div>
+        )}
+        <textarea
+          autoFocus
+          className="border border-gray-300 p-2 align-top"
+          placeholder="Paste Behave Graph JSON here"
+          value={value}
+          onChange={(e) => setValue(e.currentTarget.value)}
+        ></textarea>
+      </div>
       <div className="p-4 text-center text-gray-800">or</div>
       <select
         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded block w-full p-3"
         onChange={(e) => setSelected(e.target.value)}
         value={selected}
+        disabled={!uploadedModelFile}
       >
         <option disabled value="">
           Select an example

@@ -8,16 +8,18 @@ import { LoadModal } from './LoadModal';
 import { SaveModal } from './SaveModal';
 import { Controls, ControlButton } from 'reactflow';
 import { NodeSpecJSON } from 'behave-graph';
+import { SaveAndLoadParams } from '../../hooks/useSaveAndLoad';
 
 const CustomControls = ({
   toggleRun,
   specJson,
   running,
+  handleSetModelAndBehaviorGraph,
 }: {
   toggleRun: () => void;
   specJson: NodeSpecJSON[];
   running: boolean;
-}) => {
+} & SaveAndLoadParams) => {
   const [loadModalOpen, setLoadModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
@@ -42,7 +44,11 @@ const CustomControls = ({
           <FontAwesomeIcon icon={running ? faPause : faPlay} />
         </ControlButton>
       </Controls>
-      <LoadModal open={loadModalOpen} onClose={() => setLoadModalOpen(false)} />
+      <LoadModal
+        open={loadModalOpen}
+        onClose={() => setLoadModalOpen(false)}
+        handleSetModelAndBehaviorGraph={handleSetModelAndBehaviorGraph}
+      />
       <SaveModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} specJson={specJson} />
       <HelpModal open={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
       <ClearModal open={clearModalOpen} onClose={() => setClearModalOpen(false)} />

@@ -1,10 +1,9 @@
 import { ObjectMap } from '@react-three/fiber';
-import { AnimationAction } from 'three';
+import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Vec3, Vec4 } from 'behave-graph';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
 import { IScene, Properties, ResourceTypes } from '../abstractions';
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import { GLTFJson } from './GLTFJson';
 
 function toVec3(value: Vector3): Vec3 {
@@ -321,8 +320,9 @@ const useSceneModifier = (gltf: GLTF & ObjectMap, setOnClickListeners: Dispatch<
   }, []);
 
   useEffect(() => {
+    console.log('buildling new scene modifier', gltf);
     setScene(buildSceneModifier(gltf, setOnClickListeners, setAnimationActive));
-  }, [gltf, setOnClickListeners]);
+  }, [gltf, setOnClickListeners, setAnimationActive]);
 
   return { scene, animations: activeAnimations };
 };

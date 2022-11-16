@@ -5,7 +5,6 @@ import { Mesh, Object3D } from 'three';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import ToggleAnimations from './ToggleAnimations';
 import { AnimationsState, OnClickListener, OnClickListeners } from './useSceneModifier';
-import { RectReadOnly } from 'react-use-measure';
 
 const RegisterOnClickListenersOnElements = ({
   jsonPath,

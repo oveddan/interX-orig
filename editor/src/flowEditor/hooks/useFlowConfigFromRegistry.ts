@@ -39,7 +39,7 @@ const useFlowConfigFromRegistry = ({
     const customNodeTypes = getCustomNodeTypes(specJson, scene);
 
     setCustomNodeTypes(customNodeTypes);
-  }, [specJson]);
+  }, [specJson, scene]);
 
   return { filters, customNodeTypes, specJson };
 };
