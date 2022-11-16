@@ -1,6 +1,7 @@
-import { IScene, NodeSpecJSON, Registry } from 'behave-graph';
+import { NodeSpecJSON, Registry } from 'behave-graph';
 import { useEffect, useState } from 'react';
 import { NodeTypes, Node, OnConnectStartParams } from 'reactflow';
+import { IScene } from '../../abstractions';
 import { NodePickerFilters } from '../components/NodePicker';
 import getCustomNodeTypes from '../util/getCustomNodeTypes';
 import { getNodePickerFilters } from '../util/getPickerFilters';

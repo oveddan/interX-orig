@@ -83,7 +83,7 @@
       },
       "parameters": {
         "jsonPath": {
-          "value": "materials/MarbleTilesRedo/color"
+          "value": "materials/0/color"
         },
         "value": {
           "link": {

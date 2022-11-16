@@ -4,9 +4,19 @@ export interface ISmartContractActions {
   unRegisterTriggerHandler: (id: string, cb: (count: bigint) => void) => void;
 }
 
-export type ResourceProperties = { names: string[]; properties: string[] };
+export type ResourceOption = {
+  name: string;
+  index: number;
+};
+
+export type ResourceProperties = { options: ResourceOption[]; properties: string[] };
+
+export type ResourceTypes = 'nodes' | 'materials' | 'animations';
+
 export type Properties = {
-  [resource: string]: ResourceProperties;
+  nodes?: ResourceProperties;
+  materials?: ResourceProperties;
+  animations?: ResourceProperties;
 };
 
 export interface IScene {

@@ -98,7 +98,7 @@
       },
       "parameters": {
         "jsonPath": {
-          "value": "nodes/Suzanne/visible"
+          "value": "nodes/0/visible"
         },
         "value": {
           "link": {
@@ -117,7 +117,7 @@
       },
       "parameters": {
         "jsonPath": {
-          "value": "nodes/Torus"
+          "value": "nodes/2"
         }
       },
       "flows": {

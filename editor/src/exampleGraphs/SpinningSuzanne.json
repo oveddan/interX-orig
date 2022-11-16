@@ -80,7 +80,7 @@
       },
       "parameters": {
         "jsonPath": {
-          "value": "nodes/Suzanne/rotation"
+          "value": "nodes/0/rotation"
         },
         "value": {
           "link": {

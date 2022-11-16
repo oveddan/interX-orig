@@ -14,10 +14,11 @@ import { v4 as uuidv4 } from 'uuid';
 import Controls from './components/Controls';
 import NodePicker from './components/NodePicker';
 import { calculateNewEdge } from './util/calculateNewEdge';
-import { IScene, NodeSpecJSON, Registry } from 'behave-graph';
+import { NodeSpecJSON, Registry } from 'behave-graph';
 import 'reactflow/dist/style.css';
 import './flowEditor.css';
 import useFlowConfigFromRegistry from './hooks/useFlowConfigFromRegistry';
+import { IScene } from '../abstractions';
 
 function Flow({
   toggleRun,

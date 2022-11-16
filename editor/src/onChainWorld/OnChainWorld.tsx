@@ -20,7 +20,7 @@ const OnChainWorld = ({
   smartContractActions: ISmartContractActions;
   tokenId: number;
 }) => {
-  const { sceneJson, sceneOnClickListeners, registry, lifecyleEmitter } = useLoadSceneAndRegistry({
+  const { sceneJson, sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
     modelUrl: sceneFileUrl,
     smartContractActions,
   });
@@ -51,7 +51,7 @@ const OnChainWorld = ({
       </nav>
 
       <div className="w-full h-full">
-        <Scene scene={sceneJson} onClickListeners={sceneOnClickListeners} />
+        <Scene scene={sceneJson} animationsState={animations} onClickListeners={sceneOnClickListeners} />
       </div>
     </>
   );
