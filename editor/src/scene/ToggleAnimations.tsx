@@ -17,11 +17,12 @@ const PlayAnimation = ({ name, actions }: { name: string; actions: AnimationActi
       return;
     }
 
-    action.play();
+    if (action.paused) action.paused = false;
+    else action.play();
 
-    // on unmount, stop playing the action
+    // on unmount, pause the action
     return () => {
-      action.stop();
+      action.paused = true;
     };
   }, [name, actions]);
 

@@ -203,6 +203,7 @@ export type OnClickCallback = (jsonPath: string) => void;
 
 export type OnClickListener = {
   path: Path;
+  elementName: string;
   callbacks: OnClickCallback[];
 };
 
@@ -215,15 +216,15 @@ const buildSceneModifier = (
   setOnClickListeners: Dispatch<SetStateAction<OnClickListeners>>,
   setActiveAnimations: (animation: string, active: boolean) => void
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const properties = extractProperties(gltf);
 
-  // clear listenerrs at first
   const addOnClickedListener = (jsonPath: string, callback: (jsonPath: string) => void) => {
     const path = parseJsonPath(jsonPath, true);
 
     setOnClickListeners((existing) => {
       const listenersForPath = existing[jsonPath] || {
         path,
+        elementName: getResourceName({ resource: path.resource, index: path.index }, properties),
         callbacks: [],
       };
 
@@ -270,8 +271,6 @@ const buildSceneModifier = (
       return result;
     });
   };
-
-  const properties = extractProperties(gltf);
 
   const getProperty = (jsonPath: string, valueTypeName: string) => {
     const path = parseJsonPath(jsonPath);

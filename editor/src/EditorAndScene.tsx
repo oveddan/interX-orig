@@ -3,7 +3,7 @@ import FlowEditor from './flowEditor/FlowEditorApp';
 import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
 // import rawGraphJSON from './exampleGraphs/TokenGatedClick.json';
-import rawGraphJSON from './exampleGraphs/AnimateAnimation.json';
+import rawGraphJSON from './exampleGraphs/ClickButtonToAnimate.json';
 import { GraphJSON } from 'behave-graph';
 import '@rainbow-me/rainbowkit/styles.css';
 import { flowToBehave } from './flowEditor/transformers/flowToBehave';
@@ -87,7 +87,7 @@ function EditorAndScene({
 const graphJson = rawGraphJSON as GraphJSON;
 
 function EditorAndSceneWrapper() {
-  const [modelUrl, setModelUrl] = useState(() => modelOptions[1]);
+  const [modelUrl, setModelUrl] = useState(() => modelOptions[0]);
 
   const [refresh, setRefresh] = useState(false);
 

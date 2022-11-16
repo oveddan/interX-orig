@@ -2,7 +2,7 @@ import { GraphJSON } from 'behave-graph';
 import SaveToIpfsAndMintButton from './SaveToIpfsAndMintButton';
 import Web3Login from './Web3Login';
 
-export const modelOptions = ['SpinningSuzanne.gltf', 'CourtYard.glb'];
+export const modelOptions = ['PressButtonToStartElevator.gltf', 'SpinningSuzanne.gltf', 'CourtYard.glb'];
 
 const ModelSelect = ({ modelUrl, setModelUrl }: { modelUrl: string; setModelUrl: (url: string) => void }) => {
   return (
