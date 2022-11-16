@@ -114,7 +114,7 @@
       },
       "parameters": {
         "jsonPath": {
-          "value": "animations/0/enabled"
+          "value": "animations/0/playing"
         },
         "value": {
           "link": {

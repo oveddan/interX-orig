@@ -173,7 +173,7 @@ function getPropertyValue(property: string, objectRef: Object3D) {
 
 const extractProperties = (gltf: GLTF): Properties => {
   const nodeProperties = ['visible', 'translation', 'scale', 'rotation', 'color'];
-  const animationProperties = ['enabled'];
+  const animationProperties = ['playing'];
   const materialProperties = ['color'];
 
   const gltfJson = gltf.parser.json as GLTFJson;

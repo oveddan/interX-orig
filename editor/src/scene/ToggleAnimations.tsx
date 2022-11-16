@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAnimations } from '@react-three/drei';
 import { AnimationAction } from 'three';
 import { ObjectMap } from '@react-three/fiber';
@@ -9,22 +9,36 @@ type AnimationActions = {
   [key: string]: AnimationAction | null;
 };
 
-const PlayAnimation = ({ name, actions }: { name: string; actions: AnimationActions }) => {
+const PlayAnimation = ({ name, actions, playing }: { name: string; actions: AnimationActions; playing: boolean }) => {
+  const [action] = useState(actions[name]);
+
   useEffect(() => {
-    const action = actions[name];
-    if (!action) {
-      console.error('invalid action name', name, 'had actions:', actions);
-      return;
-    }
+    if (!action) return;
+    // reset animation state on mount
+    action.reset();
 
-    if (action.paused) action.paused = false;
-    else action.play();
-
-    // on unmount, pause the action
+    // on unmount, stop the animation
     return () => {
-      action.paused = true;
+      if (!action.paused) action.stop();
     };
-  }, [name, actions]);
+  }, [action]);
+
+  useEffect(() => {
+    if (playing) {
+      if (!action) {
+        console.error('invalid action name', name, 'had actions:', actions);
+        return;
+      }
+
+      if (action.paused) action.paused = false;
+      else action.play();
+
+      // on stop playing, pause the action
+      return () => {
+        action.paused = true;
+      };
+    }
+  }, [name, actions, action]);
 
   return null;
 };
@@ -34,11 +48,9 @@ const ToggleAnimations = ({ gltf, animationsState }: { gltf: GLTF & ObjectMap; a
 
   return (
     <>
-      {Object.entries(animationsState)
-        .filter(([, enabled]) => !!enabled)
-        .map(([name]) => (
-          <PlayAnimation key={name} name={name} actions={animationActions} />
-        ))}
+      {Object.entries(animationsState).map(([name, playing]) => (
+        <PlayAnimation key={name} playing={playing} name={name} actions={animationActions} />
+      ))}
     </>
   );
 };
