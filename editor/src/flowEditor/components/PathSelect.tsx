@@ -16,7 +16,7 @@ const PathSelect = ({
   });
 
   const [resourceType, setResourceType] = useState<ResourceTypes | undefined>(initialValue?.resource);
-  const [elementName, setElementName] = useState<string | undefined>(initialValue?.name);
+  const [elementId, setElementId] = useState<number | undefined>(initialValue?.index);
   const [property, setProperty] = useState<string | undefined>(initialValue?.property);
 
   const [properties] = useState(getProperties());
@@ -24,7 +24,7 @@ const PathSelect = ({
   useEffect(() => {
     const jsonPath = toJsonPathString(
       {
-        name: elementName,
+        index: elementId,
         property: property,
         resource: resourceType,
       },
@@ -34,7 +34,7 @@ const PathSelect = ({
     console.log('got json path string', jsonPath);
 
     onChange(jsonPath);
-  }, [resourceType, elementName, property, onChange, short]);
+  }, [resourceType, elementId, property, onChange, short]);
 
   return (
     <>
@@ -52,14 +52,14 @@ const PathSelect = ({
       </select>
       {resourceType && (
         <select
-          value={elementName}
-          onChange={(e) => setElementName(e.target.value)}
+          value={elementId}
+          onChange={(e) => setElementId(+e.target.value)}
           className=" bg-gray-600 disabled:bg-gray-700 py-1 px-2 nodrag"
         >
           <option>--element--</option>
-          {properties[resourceType].names.map((name) => (
-            <option value={name} key={name}>
-              {name}
+          {properties[resourceType].options.map(({ name, index }) => (
+            <option value={index} key={name}>
+              {index}
             </option>
           ))}
         </select>

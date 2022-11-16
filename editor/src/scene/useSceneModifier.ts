@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'reac
 import { Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
 import { IScene, Properties } from '../abstractions';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFJson } from './GLTFJson';
 
 function toVec3(value: Vector3): Vec3 {
   return new Vec3(value.x, value.y, value.z);
@@ -12,8 +13,8 @@ function toVec4(value: Vector4 | Quaternion): Vec4 {
   return new Vec4(value.x, value.y, value.z, value.w);
 }
 
-const shortPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)$/;
-const jsonPathRegEx = /^\/?(?<resource>[^/]+)\/(?<name>[^/]+)\/(?<property>[^/]+)$/;
+const shortPathRegEx = /^\/?(?<resource>[^/]+)\/(?<index>\d+)$/;
+const jsonPathRegEx = /^\/?(?<resource>[^/]+)\/(?<index>\d+)\/(?<property>[^/]+)$/;
 export type ResourceTypes = 'nodes' | 'materials';
 
 export type Optional<T> = {
@@ -22,20 +23,17 @@ export type Optional<T> = {
 
 export type Path = {
   resource: ResourceTypes;
-  name: string;
+  index: number;
   property: string;
 };
 
-export function toJsonPathString(
-  { name: elementName, property, resource: resourceType }: Optional<Path>,
-  short: boolean
-) {
+export function toJsonPathString({ index, property, resource: resourceType }: Optional<Path>, short: boolean) {
   if (short) {
-    if (!resourceType || !elementName) return;
-    return `${resourceType}/${elementName}`;
+    if (!resourceType || !index) return;
+    return `${resourceType}/${index}`;
   } else {
-    if (!resourceType || !elementName || !property) return;
-    return `${resourceType}/${elementName}/${property}`;
+    if (!resourceType || !index || !property) return;
+    return `${resourceType}/${index}/${property}`;
   }
 }
 
@@ -47,12 +45,12 @@ export function parseJsonPath(jsonPath: string, short = false): Path {
   if (matches.groups === undefined) throw new Error(`can not parse jsonPath (no groups): ${jsonPath}`);
   return {
     resource: matches.groups.resource as ResourceTypes,
-    name: matches.groups.name,
+    index: +matches.groups.name,
     property: matches.groups.property,
   };
 }
 
-function applyPropertyToModel({ resource, name, property }: Path, gltf: GLTF & ObjectMap, value: any) {
+function applyPropertyToModel({ resource, index: name, property }: Path, gltf: GLTF & ObjectMap, value: any) {
   if (resource === 'nodes') {
     const node = gltf.nodes[name];
 
@@ -81,7 +79,7 @@ function applyPropertyToModel({ resource, name, property }: Path, gltf: GLTF & O
   console.error(`unknown resource type ${resource}`);
 }
 
-function getPropertyFromModel({ resource, name, property }: Path, gltf: GLTF & ObjectMap) {
+function getPropertyFromModel({ resource, index: name, property }: Path, gltf: GLTF & ObjectMap) {
   if (resource === 'nodes') {
     const node = gltf.nodes[name];
 
@@ -215,8 +213,6 @@ const buildSceneModifier = (
         };
       }
 
-      console.log('none left...clearing');
-
       const result = {
         ...existing,
       };
@@ -241,14 +237,18 @@ const buildSceneModifier = (
 
   const getProperties = (): Properties => {
     const nodeProperties = ['visible', 'translation', 'scale', 'rotation', 'color'];
+    const animationProperties = ['enabled'];
     const materialProperties = ['color'];
 
-    const nodeNames = Object.entries(gltf.nodes).map(([name]) => name);
-    const materialNames = Object.entries(gltf.materials).map(([name]) => name);
+    const gltfJson = gltf.parser.json as GLTFJson;
+    const nodeOptions = gltfJson.nodes.map(({ name }, index) => ({ name: name || index.toString(), index }));
+    const materialOptions = gltfJson.materials.map(({ name }, index) => ({ name: name || index.toString(), index }));
+    const animationOptions = gltf.animations.map(({ name }, index) => ({ name: name || index.toString(), index }));
 
     const properties: Properties = {
-      nodes: { names: nodeNames, properties: nodeProperties },
-      materials: { names: materialNames, properties: materialProperties },
+      nodes: { options: nodeOptions, properties: nodeProperties },
+      animations: { options: animationOptions, properties: animationProperties },
+      materials: { options: materialOptions, properties: materialProperties },
     };
 
     return properties;

@@ -21,7 +21,7 @@ const RegisterOnClickListenersOnElements = ({
 
   useEffect(() => {
     if (listeners.path.resource === 'nodes') {
-      const node = gltf.nodes[listeners.path.name].clone() as Mesh;
+      const node = gltf.nodes[listeners.path.index].clone() as Mesh;
 
       setNode(node);
       return;
