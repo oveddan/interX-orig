@@ -1,10 +1,10 @@
-import { Engine, ILifecycleEventEmitter } from 'behave-graph';
 import { OrbitControls, Stage, useCursor } from '@react-three/drei';
 import { Canvas, ObjectMap } from '@react-three/fiber';
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Mesh, MeshBasicMaterial, Object3D } from 'three';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Mesh, Object3D } from 'three';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
-import { OnClickListener, OnClickListeners } from './useSceneModifier';
+import ToggleAnimations from './ToggleAnimations';
+import { AnimationsState, OnClickListener, OnClickListeners } from './useSceneModifier';
 
 const RegisterOnClickListenersOnElements = ({
   jsonPath,
@@ -45,7 +45,15 @@ const RegisterOnClickListenersOnElements = ({
   );
 };
 
-const Scene = ({ scene, onClickListeners }: { scene: GLTF & ObjectMap; onClickListeners: OnClickListeners }) => {
+const Scene = ({
+  scene,
+  onClickListeners,
+  animationsState,
+}: {
+  scene: GLTF & ObjectMap;
+  onClickListeners: OnClickListeners;
+  animationsState: AnimationsState;
+}) => {
   const mainRef = useRef<Object3D>();
   const [hovered, setHovered] = useState(false);
   useCursor(hovered, 'pointer', 'auto');
@@ -68,6 +76,7 @@ const Scene = ({ scene, onClickListeners }: { scene: GLTF & ObjectMap; onClickLi
           </primitive>
         </>
       </Stage>
+      <ToggleAnimations gltf={scene} animationsState={animationsState} />
     </Canvas>
   );
 };

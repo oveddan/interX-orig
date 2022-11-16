@@ -11,17 +11,18 @@ const useLoadSceneAndRegistry = ({
   modelUrl: string;
   smartContractActions: ISmartContractActions;
 }) => {
-  const sceneJson = useGLTF(modelUrl);
+  const gltf = useGLTF(modelUrl);
 
   const [sceneOnClickListeners, setSceneOnClickListeners] = useState<OnClickListeners>({});
 
-  const scene = useSceneModifier(sceneJson, setSceneOnClickListeners);
+  const { scene, animations } = useSceneModifier(gltf, setSceneOnClickListeners);
 
   const { registry, specJson, lifecyleEmitter } = useRegistry({ scene, smartContractActions });
 
   return {
-    sceneJson,
+    sceneJson: gltf,
     scene,
+    animations,
     sceneOnClickListeners,
     registry,
     specJson,

@@ -3,7 +3,7 @@ import FlowEditor from './flowEditor/FlowEditorApp';
 import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
 // import rawGraphJSON from './exampleGraphs/TokenGatedClick.json';
-import rawGraphJSON from './exampleGraphs/SpinningSuzanne.json';
+import rawGraphJSON from './exampleGraphs/AnimateAnimation.json';
 import { GraphJSON } from 'behave-graph';
 import '@rainbow-me/rainbowkit/styles.css';
 import { flowToBehave } from './flowEditor/transformers/flowToBehave';
@@ -23,10 +23,11 @@ function EditorAndScene({
   setModelUrl: (url: string) => void;
 }) {
   const smartContractActions = useMockSmartContractActions();
-  const { sceneJson, scene, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
-    modelUrl,
-    smartContractActions,
-  });
+  const { sceneJson, scene, animations, sceneOnClickListeners, registry, specJson, lifecyleEmitter } =
+    useLoadSceneAndRegistry({
+      modelUrl,
+      smartContractActions,
+    });
 
   const { nodes, edges, onNodesChange, onEdgesChange } = useBehaveToFlow(rawGraphJSON);
 
@@ -75,7 +76,7 @@ function EditorAndScene({
           <Nav contractAddress={contractAddress} graphJson={graphJson} modelUrl={modelUrl} setModelUrl={setModelUrl} />
         </div>
         <div className="row-span-6">
-          <Scene scene={sceneJson} onClickListeners={sceneOnClickListeners} />
+          <Scene scene={sceneJson} onClickListeners={sceneOnClickListeners} animationsState={animations} />
         </div>
       </div>
     </div>
@@ -86,7 +87,7 @@ function EditorAndScene({
 const graphJson = rawGraphJSON as GraphJSON;
 
 function EditorAndSceneWrapper() {
-  const [modelUrl, setModelUrl] = useState(() => modelOptions[0]);
+  const [modelUrl, setModelUrl] = useState(() => modelOptions[1]);
 
   const [refresh, setRefresh] = useState(false);
 

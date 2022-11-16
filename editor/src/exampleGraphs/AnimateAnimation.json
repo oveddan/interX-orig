@@ -1,0 +1,112 @@
+{
+  "nodes": [
+    {
+      "id": "ab224bec-2e5e-4df4-8b05-e8aed10da90f",
+      "type": "math/divide/float",
+      "metadata": {
+        "positionX": "-375.52950797124504",
+        "positionY": "50.8238522717417"
+      },
+      "parameters": {
+        "b": {
+          "value": "100"
+        },
+        "a": {
+          "link": {
+            "nodeId": "0",
+            "socket": "time"
+          }
+        }
+      }
+    },
+    {
+      "id": "fcb81837-650c-42fb-a708-236f2ee64abc",
+      "type": "scene/set/boolean",
+      "metadata": {
+        "positionX": "457.07379864225277",
+        "positionY": "-138.20603399800524"
+      },
+      "parameters": {
+        "jsonPath": {
+          "value": "animations/0/enabled"
+        },
+        "value": {
+          "link": {
+            "nodeId": "e9738cb2-d15d-4c0b-b4b4-3e480e607435",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "e9738cb2-d15d-4c0b-b4b4-3e480e607435",
+      "type": "math/equal/float",
+      "metadata": {
+        "positionX": "153.65922805461295",
+        "positionY": "19.69072316583901"
+      },
+      "parameters": {
+        "b": {
+          "value": "1"
+        },
+        "a": {
+          "link": {
+            "nodeId": "d8766308-df00-4876-95b9-ae6c7bfffc38",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "d8766308-df00-4876-95b9-ae6c7bfffc38",
+      "type": "math/abs/float",
+      "metadata": {
+        "positionX": "-8.00153205638869",
+        "positionY": "12.73816679026585"
+      },
+      "parameters": {
+        "a": {
+          "link": {
+            "nodeId": "edf1390c-b75d-40c1-9b0b-18ea2d0063cc",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "edf1390c-b75d-40c1-9b0b-18ea2d0063cc",
+      "type": "math/modulus/float",
+      "metadata": {
+        "positionX": "-189.80192187467816",
+        "positionY": "16.3381745094399"
+      },
+      "parameters": {
+        "b": {
+          "value": "2"
+        },
+        "a": {
+          "link": {
+            "nodeId": "ab224bec-2e5e-4df4-8b05-e8aed10da90f",
+            "socket": "result"
+          }
+        }
+      }
+    },
+    {
+      "id": "0",
+      "type": "lifecycle/onTick",
+      "metadata": {
+        "positionX": "-519.5235715897397",
+        "positionY": "-160.8685228932645"
+      },
+      "flows": {
+        "flow": {
+          "nodeId": "fcb81837-650c-42fb-a708-236f2ee64abc",
+          "socket": "flow"
+        }
+      }
+    }
+  ],
+  "variables": [],
+  "customEvents": []
+}

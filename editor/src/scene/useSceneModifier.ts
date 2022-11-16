@@ -1,4 +1,5 @@
 import { ObjectMap } from '@react-three/fiber';
+import { AnimationAction } from 'three';
 import { Vec3, Vec4 } from 'behave-graph';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
@@ -53,11 +54,12 @@ function applyPropertyToModel(
   { resource, index, property }: Path,
   gltf: GLTF & ObjectMap,
   value: any,
-  properties: Properties
+  properties: Properties,
+  setActiveAnimations: (animation: string, active: boolean) => void
 ) {
+  const nodeName = getResourceName({ resource, index }, properties);
+  if (!nodeName) throw new Error(`could not get node at index ${index}`);
   if (resource === 'nodes') {
-    const nodeName = getResourceName({ resource, index }, properties);
-    if (!nodeName) throw new Error(`could not get node at index ${index}`);
     const node = gltf.nodes[nodeName];
 
     if (!node) {
@@ -70,8 +72,6 @@ function applyPropertyToModel(
     return;
   }
   if (resource === 'materials') {
-    const nodeName = getResourceName({ resource, index }, properties);
-    if (!nodeName) throw new Error(`could not get node at index ${index}`);
     const node = gltf.materials[nodeName];
 
     if (!node) {
@@ -81,6 +81,11 @@ function applyPropertyToModel(
 
     applyMaterialModifier(property, node, value);
 
+    return;
+  }
+
+  if (resource === 'animations') {
+    setActiveAnimations(nodeName, value as boolean);
     return;
   }
 
@@ -207,7 +212,8 @@ export type OnClickListeners = {
 
 const buildSceneModifier = (
   gltf: GLTF & ObjectMap,
-  setOnClickListeners: Dispatch<SetStateAction<OnClickListeners>>
+  setOnClickListeners: Dispatch<SetStateAction<OnClickListeners>>,
+  setActiveAnimations: (animation: string, active: boolean) => void
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
 
@@ -276,7 +282,7 @@ const buildSceneModifier = (
   const setProperty = (jsonPath: string, valueTypeName: string, value: any) => {
     const path = parseJsonPath(jsonPath);
 
-    applyPropertyToModel(path, gltf, value, properties);
+    applyPropertyToModel(path, gltf, value, properties, setActiveAnimations);
   };
 
   const getProperties = () => properties;
@@ -292,14 +298,30 @@ const buildSceneModifier = (
   return scene;
 };
 
+export type AnimationsState = { [key: string]: boolean };
+
 const useSceneModifier = (gltf: GLTF & ObjectMap, setOnClickListeners: Dispatch<SetStateAction<OnClickListeners>>) => {
   const [scene, setScene] = useState<IScene>();
 
+  const [activeAnimations, setActiveAnimations] = useState<AnimationsState>({});
+
   useEffect(() => {
-    setScene(buildSceneModifier(gltf, setOnClickListeners));
+    // reset state on new active animations
+    setActiveAnimations({});
+  }, [gltf]);
+
+  const setAnimationActive = useCallback((animation: string, active: boolean) => {
+    setActiveAnimations((existing) => ({
+      ...existing,
+      [animation]: active,
+    }));
+  }, []);
+
+  useEffect(() => {
+    setScene(buildSceneModifier(gltf, setOnClickListeners, setAnimationActive));
   }, [gltf, setOnClickListeners]);
 
-  return scene;
+  return { scene, animations: activeAnimations };
 };
 
 export default useSceneModifier;
