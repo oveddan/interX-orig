@@ -38,7 +38,7 @@ const PlayAnimation = ({ name, actions, playing }: { name: string; actions: Anim
         action.paused = true;
       };
     }
-  }, [name, actions, action]);
+  }, [name, actions, action, playing]);
 
   return null;
 };
