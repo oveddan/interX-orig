@@ -310,10 +310,14 @@ const useSceneModifier = (gltf: GLTF & ObjectMap, setOnClickListeners: Dispatch<
   }, [gltf]);
 
   const setAnimationActive = useCallback((animation: string, active: boolean) => {
-    setActiveAnimations((existing) => ({
-      ...existing,
-      [animation]: active,
-    }));
+    setActiveAnimations((existing) => {
+      if (!!existing[animation] === active) return existing;
+
+      return {
+        ...existing,
+        [animation]: active,
+      };
+    });
   }, []);
 
   useEffect(() => {

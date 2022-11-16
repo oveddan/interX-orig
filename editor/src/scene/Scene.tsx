@@ -1,10 +1,11 @@
 import { OrbitControls, Stage, useCursor } from '@react-three/drei';
 import { Canvas, ObjectMap } from '@react-three/fiber';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, memo } from 'react';
 import { Mesh, Object3D } from 'three';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import ToggleAnimations from './ToggleAnimations';
 import { AnimationsState, OnClickListener, OnClickListeners } from './useSceneModifier';
+import { useWhyDidYouUpdate } from 'use-why-did-you-update';
 
 const RegisterOnClickListenersOnElements = ({
   jsonPath,
@@ -45,36 +46,41 @@ const RegisterOnClickListenersOnElements = ({
   );
 };
 
-const Scene = ({
-  scene,
-  onClickListeners,
-  animationsState,
-}: {
+type SceneProps = {
   scene: GLTF & ObjectMap;
   onClickListeners: OnClickListeners;
   animationsState: AnimationsState;
-}) => {
-  const mainRef = useRef<Object3D>();
+};
+
+const RegisterOnClickListeners = ({ onClickListeners, scene }: Pick<SceneProps, 'onClickListeners' | 'scene'>) => {
   const [hovered, setHovered] = useState(false);
   useCursor(hovered, 'pointer', 'auto');
 
   return (
+    <>
+      {Object.entries(onClickListeners).map(([jsonPath, listeners]) => (
+        <RegisterOnClickListenersOnElements
+          key={jsonPath}
+          gltf={scene}
+          jsonPath={jsonPath}
+          listeners={listeners}
+          setHovered={setHovered}
+        />
+      ))}
+    </>
+  );
+};
+
+const Scene = ({ scene, onClickListeners, animationsState }: SceneProps) => {
+  const [mainRef, setMainRef] = useState<Object3D | null>(null);
+
+  return (
     <Canvas className="w-full h-full">
-      <OrbitControls target={mainRef.current?.position} makeDefault />
-      <Stage shadows adjustCamera intensity={1} environment="city" preset="rembrandt">
-        <>
-          <primitive object={scene.scene} ref={mainRef}>
-            {Object.entries(onClickListeners).map(([jsonPath, listeners]) => (
-              <RegisterOnClickListenersOnElements
-                key={jsonPath}
-                gltf={scene}
-                jsonPath={jsonPath}
-                listeners={listeners}
-                setHovered={setHovered}
-              />
-            ))}
-          </primitive>
-        </>
+      <OrbitControls makeDefault target={mainRef?.position} />
+      <Stage shadows adjustCamera={false} intensity={1} environment="city" preset="rembrandt">
+        <primitive object={scene.scene} ref={setMainRef}>
+          <RegisterOnClickListeners scene={scene} onClickListeners={onClickListeners} />
+        </primitive>
       </Stage>
       <ToggleAnimations gltf={scene} animationsState={animationsState} />
     </Canvas>
