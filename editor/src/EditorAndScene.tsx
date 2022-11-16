@@ -14,6 +14,45 @@ import { useBehaveToFlow } from './hooks/useBehaveToFlow';
 import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
 import SplitPane from 'react-split-pane';
 import './styles/resizer.css';
+import { VscSplitVertical, VscSplitHorizontal } from 'react-icons/vsc';
+import clsx from 'clsx';
+
+type splitDirection = 'vertical' | 'horizontal';
+
+const toggleButtonClass = (active: boolean) =>
+  clsx('font-medium text-sm p-2 text-center inline-flex items-center mr-2', {
+    'text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800':
+      active,
+    'text-gray-700 border border-gray-700 hover:bg-gray-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-300 dark:border-gray-500 dark:text-gray-500 dark:hover:text-white dark:focus:ring-gray-800':
+      !active,
+  });
+
+const TogglePaneButtons = ({
+  splitDirection,
+  setSplitDirection,
+}: {
+  splitDirection: 'vertical' | 'horizontal';
+  setSplitDirection: (dir: splitDirection) => void;
+}) => (
+  <>
+    <button
+      type="button"
+      className={toggleButtonClass(splitDirection === 'vertical')}
+      onClick={() => setSplitDirection('vertical')}
+    >
+      <VscSplitHorizontal />
+      <span className="sr-only">Split Vertical</span>
+    </button>
+    <button
+      type="button"
+      className={toggleButtonClass(splitDirection === 'horizontal')}
+      onClick={() => setSplitDirection('horizontal')}
+    >
+      <VscSplitVertical />
+      <span className="sr-only">Split Horizontal</span>
+    </button>
+  </>
+);
 
 function EditorAndScene({
   modelUrl,
@@ -60,7 +99,7 @@ function EditorAndScene({
 
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>();
 
-  const handleChange = useCallback(() => {
+  const handleSplitResized = useCallback(() => {
     if (rightRef.current) {
       const boundingRect = rightRef.current.getBoundingClientRect();
       setDimensions({
@@ -70,14 +109,24 @@ function EditorAndScene({
     }
   }, []);
 
+  const [splitDirection, setSplitDirection] = useState<splitDirection>('vertical');
+
   useEffect(() => {
-    handleChange();
-  }, [handleChange]);
+    handleSplitResized();
+  }, [handleSplitResized, splitDirection]);
 
   return (
     <div className="h-full w-full">
+      <div
+        className={clsx('absolute right-2 z-50', {
+          'top-14': splitDirection === 'horizontal',
+          'top-2': splitDirection === 'vertical',
+        })}
+      >
+        <TogglePaneButtons setSplitDirection={setSplitDirection} splitDirection={splitDirection} />
+      </div>
       {/* @ts-ignore */}
-      <SplitPane split="vertical" minSize={700} onChange={handleChange}>
+      <SplitPane split={splitDirection} defaultSize={500} onChange={handleSplitResized}>
         <div className="w-full h-full">
           {specJson && scene && (
             <FlowEditor
@@ -103,7 +152,7 @@ function EditorAndScene({
           </div> */}
         <div className="w-full h-full overflow-hidden" ref={rightRef}>
           {dimensions && (
-            <div style={{ position: 'absolute', ...dimensions }}>
+            <div style={{ ...dimensions }} className="absolute z-40">
               <Scene
                 scene={sceneJson}
                 onClickListeners={sceneOnClickListeners}
