@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import FlowEditor from './flowEditor/FlowEditorApp';
 import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
@@ -12,6 +12,8 @@ import useLoadSceneAndRegistry from './hooks/useLoadSceneAndRegistry';
 import Nav, { modelOptions } from './nav/Nav';
 import { useBehaveToFlow } from './hooks/useBehaveToFlow';
 import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
+import SplitPane from 'react-split-pane';
+import './styles/resizer.css';
 
 function EditorAndScene({
   modelUrl,
@@ -54,31 +56,64 @@ function EditorAndScene({
 
   const contractAddress = useTokenContractAddress();
 
+  const rightRef = useRef<HTMLDivElement | null>(null);
+
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>();
+
+  const handleChange = useCallback(() => {
+    if (rightRef.current) {
+      const boundingRect = rightRef.current.getBoundingClientRect();
+      setDimensions({
+        height: boundingRect.height,
+        width: boundingRect.width,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    handleChange();
+  }, [handleChange]);
+
   return (
-    <div className="h-full grid grid-cols-2 gap-0">
-      <div className="bg-lime-500 h-full">
-        {specJson && scene && (
-          <FlowEditor
-            toggleRun={toggleRun}
-            registry={registry}
-            nodes={nodes}
-            onNodesChange={onNodesChange}
-            edges={edges}
-            onEdgesChange={onEdgesChange}
-            specJson={specJson}
-            running={run}
-            scene={scene}
-          />
-        )}
-      </div>
-      <div className="h-full grid">
-        <div className="row-span-1">
-          <Nav contractAddress={contractAddress} graphJson={graphJson} modelUrl={modelUrl} setModelUrl={setModelUrl} />
+    <div className="h-full w-full">
+      {/* @ts-ignore */}
+      <SplitPane split="vertical" minSize={700} onChange={handleChange}>
+        <div className="w-full h-full">
+          {specJson && scene && (
+            <FlowEditor
+              toggleRun={toggleRun}
+              registry={registry}
+              nodes={nodes}
+              onNodesChange={onNodesChange}
+              edges={edges}
+              onEdgesChange={onEdgesChange}
+              specJson={specJson}
+              running={run}
+              scene={scene}
+            />
+          )}
         </div>
-        <div className="row-span-6">
-          <Scene scene={sceneJson} onClickListeners={sceneOnClickListeners} animationsState={animations} />
+        {/* <div className="row-span-1">
+            <Nav
+              contractAddress={contractAddress}
+              graphJson={graphJson}
+              modelUrl={modelUrl}
+              setModelUrl={setModelUrl}
+            />
+          </div> */}
+        <div className="w-full h-full overflow-hidden" ref={rightRef}>
+          {dimensions && (
+            <div style={{ position: 'absolute', ...dimensions }}>
+              <Scene
+                scene={sceneJson}
+                onClickListeners={sceneOnClickListeners}
+                animationsState={animations}
+                {...dimensions}
+              />
+            </div>
+          )}
         </div>
-      </div>
+      </SplitPane>
     </div>
   );
 }

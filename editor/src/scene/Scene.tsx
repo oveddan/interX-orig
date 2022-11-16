@@ -5,7 +5,7 @@ import { Mesh, Object3D } from 'three';
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import ToggleAnimations from './ToggleAnimations';
 import { AnimationsState, OnClickListener, OnClickListeners } from './useSceneModifier';
-import { useWhyDidYouUpdate } from 'use-why-did-you-update';
+import { RectReadOnly } from 'react-use-measure';
 
 const RegisterOnClickListenersOnElements = ({
   jsonPath,
@@ -75,7 +75,7 @@ const Scene = ({ scene, onClickListeners, animationsState }: SceneProps) => {
   const [mainRef, setMainRef] = useState<Object3D | null>(null);
 
   return (
-    <Canvas className="w-full h-full">
+    <Canvas>
       <OrbitControls makeDefault target={mainRef?.position} />
       <Stage shadows adjustCamera={false} intensity={1} environment="city" preset="rembrandt">
         <primitive object={scene.scene} ref={setMainRef}>
