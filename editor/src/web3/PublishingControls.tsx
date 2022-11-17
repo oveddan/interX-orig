@@ -1,22 +1,43 @@
+import { useState } from 'react';
 import { GraphJSON } from 'behave-graph';
-import SaveToIpfsAndMintButton from '../web3/SaveToIpfsAndMintButton';
-import useTokenContractAddress from './useTokenContractAddress';
+import { ControlButton } from 'reactflow';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { PublishModal } from './PublishModal';
+
+const ChainIcon = () => (
+  <ConnectButton.Custom>
+    {({ chain }) => {
+      if (!chain?.iconUrl) return null;
+      // Note: If your app doesn't use authentication, you
+      // can remove all 'authenticationStatus' checks
+      return <img alt={chain.name ?? 'Chain icon'} src={chain.iconUrl} style={{ width: 12, height: 12 }} />;
+    }}
+  </ConnectButton.Custom>
+);
 
 const PublishingControls = ({
   graphJson,
-  modelUrl,
+  modelFile,
 }: {
   graphJson: GraphJSON | undefined;
-  modelUrl: string;
-  contractAddress: string | null;
+  modelFile: File | undefined;
 }) => {
-  const contractAddress = useTokenContractAddress();
+  const [publishingModalOpen, setPublishModalOpen] = useState(false);
 
   return (
     <>
-      {graphJson && contractAddress && (
-        <SaveToIpfsAndMintButton behaviorGraph={graphJson} contractAddress={contractAddress} modelUrl={modelUrl} />
-      )}
+      <ControlButton title="Publish" onClick={() => setPublishModalOpen(true)}>
+        <ChainIcon />
+      </ControlButton>
+
+      <PublishModal
+        open={publishingModalOpen}
+        onClose={() => setPublishModalOpen(false)}
+        graphJson={graphJson}
+        modelFile={modelFile}
+      />
     </>
   );
 };
+
+export default PublishingControls;

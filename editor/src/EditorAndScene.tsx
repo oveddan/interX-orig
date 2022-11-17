@@ -17,6 +17,7 @@ import Controls from './flowEditor/components/Controls';
 import useSaveAndLoad from './hooks/useSaveAndLoad';
 import GltfLoader from './scene/GltfLoader';
 import Nav from './nav/Nav';
+import PublishingControls from './web3/PublishingControls';
 
 type splitDirection = 'vertical' | 'horizontal';
 
@@ -117,15 +118,21 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
     handleSplitResized();
   }, [handleSplitResized, splitDirection]);
 
-  const web3Controls = web3Enabled && <PublishingControls />;
+  const web3Controls = web3Enabled ? <PublishingControls graphJson={graphJson} modelFile={modelFile?.file} /> : null;
 
   const controls = specJson && (
-    <Controls toggleRun={toggleRun} specJson={specJson} running={run} {...saveAndLoadProps} />
+    <Controls
+      toggleRun={toggleRun}
+      specJson={specJson}
+      running={run}
+      {...saveAndLoadProps}
+      additionalControls={web3Controls}
+    />
   );
 
   return (
     <>
-      {/* <Nav isWeb3Enabled={web3Enabled} /> */}
+      <Nav isWeb3Enabled={web3Enabled} />
       <div className="w-full h-full relative">
         <div
           className={clsx('absolute right-2 z-50', {

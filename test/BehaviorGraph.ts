@@ -25,14 +25,14 @@ describe('BehaviorGraph', function () {
   }
 
   describe('safeMint', () => {
-    it('raises an erroor if the caller is not the owner', async () => {
+    it('does not raise an erroor if the caller is not the owner', async () => {
       const { behaviorGraph, otherAccount } = await loadFixture(deployFixture);
 
       const ipfsHash = 'asdfasdfasfda';
 
       const nodesToCreate: NodeStruct[] = [];
 
-      await expect(behaviorGraph.connect(otherAccount).safeMint(ipfsHash, nodesToCreate)).to.be.rejected;
+      await expect(behaviorGraph.connect(otherAccount).safeMint(ipfsHash, nodesToCreate)).to.not.be.rejected;
     });
     it('creates a token with the list of node onto the list of nodes', async () => {
       const { behaviorGraph, otherAccount } = await loadFixture(deployFixture);

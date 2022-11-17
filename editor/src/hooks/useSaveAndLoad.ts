@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react';
-import { modelOptions } from '../nav/Nav';
 import { GraphJSON } from 'behave-graph';
 import { behaveToFlow } from '../flowEditor/transformers/behaveToFlow';
 import { hasPositionMetaData } from '../flowEditor/util/hasPositionMetaData';
@@ -38,8 +37,6 @@ export const dataUrlFromFile = async (file: File) => {
 };
 
 export const publicUrl = (path: string) => new URL(path, import.meta.url).href;
-
-const defaultModelUrl = () => publicUrl(`/examples/models/${modelOptions[0]}`);
 
 export const emptyGraphJson = (): GraphJSON => ({});
 

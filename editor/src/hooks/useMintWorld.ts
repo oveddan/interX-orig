@@ -1,6 +1,6 @@
 import { GraphJSON, NodeParametersJSON, NodeParameterValueJSON } from 'behave-graph';
 import { useEffect, useState } from 'react';
-import { usePrepareContractWrite, useContractWrite } from 'wagmi';
+import { usePrepareContractWrite, useContractWrite, useContractEvent } from 'wagmi';
 import { abi } from '../contracts/abi';
 import {
   actionNameParamName,
@@ -61,7 +61,25 @@ const toMintArgs = (cid: string, behaviorGraph: GraphJSON, contractAddress: stri
   actionsToSmartContractActions(behaviorGraph, contractAddress),
 ];
 
-const useInteractiveWorldMinter = ({
+const useWaitForMintedTokenWithContentUri = ({ contractAddress, cid }: { contractAddress: string; cid: string }) => {
+  const [mintedTokenId, setMintedTokenId] = useState<number | null>(null);
+
+  useContractEvent({
+    address: contractAddress,
+    abi: abi,
+    eventName: 'SafeMint',
+    listener(tokenId, to, uri, nodes) {
+      // hack - if this was minted with the proper cid, we can assume this was the token.
+      if (uri === cid) {
+        setMintedTokenId(tokenId.toNumber());
+      }
+    },
+  });
+
+  return mintedTokenId;
+};
+
+const useMintWorld = ({
   worldCid,
   contractAddress,
   behaviorGraph,
@@ -72,6 +90,11 @@ const useInteractiveWorldMinter = ({
 }) => {
   const [args, setArgs] = useState(() => toMintArgs(worldCid, behaviorGraph, contractAddress));
 
+  useEffect(() => {
+    const args = toMintArgs(worldCid, behaviorGraph, contractAddress);
+    setArgs(args);
+  }, [worldCid, behaviorGraph, contractAddress]);
+
   const { config, error, isError } = usePrepareContractWrite({
     address: contractAddress,
     abi,
@@ -79,22 +102,30 @@ const useInteractiveWorldMinter = ({
     args,
   });
 
-  useEffect(() => {
-    const args = toMintArgs(worldCid, behaviorGraph, contractAddress);
-    console.log({ args });
-    setArgs(args);
-  }, [worldCid, behaviorGraph, contractAddress]);
-
   const { data, isLoading, isSuccess, write } = useContractWrite({
     ...config,
   });
 
-  console.log({
-    error,
-    isError,
+  const mintedTokenId = useWaitForMintedTokenWithContentUri({
+    contractAddress,
+    cid: worldCid,
   });
 
-  return { write, isSuccess, isLoading, isError, error };
+  // useWhyDidYouUpdate('mintWorld', {
+  //   data,
+  //   mintedTokenId,
+  //   isLoading,
+  //   isSuccess,
+  //   write,
+  //   ...config,
+  //   error,
+  //   isError,
+  //   args,
+  // });
+
+  return { mint: write, isSuccess, isLoading, isError, error, mintedTokenId };
 };
 
-export default useInteractiveWorldMinter;
+export type MintWorldReturn = ReturnType<typeof useMintWorld>;
+
+export default useMintWorld;
