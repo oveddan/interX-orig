@@ -4,7 +4,7 @@ import { useReactFlow } from 'reactflow';
 import { Modal } from './Modal';
 import { useDropzone } from 'react-dropzone';
 
-import { dataUrlFromFile, emptyGraphJson, ModelFile, publicUrl, SaveAndLoadParams } from '../../hooks/useSaveAndLoad';
+import { emptyGraphJson, fetchModelFile, publicUrl, SaveAndLoadParams } from '../../hooks/useSaveAndLoad';
 import ModelPreview from '../../scene/ModelPreview';
 
 const modelFiles = {
@@ -20,7 +20,7 @@ const graphFiles = {
   tokenGatedClick: 'TokenGatedClick.json',
 };
 
-const examplePairs: [string, string][] = [
+export const examplePairs: [string, string][] = [
   [modelFiles.pressButtonToStartElevator, graphFiles.clickButtonToAnimate],
   [modelFiles.courtyard, graphFiles.animatedBuildingColor],
   [modelFiles.suzanne, graphFiles.spinningSuzanne],
@@ -106,36 +106,17 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
     if (!uploadedModelFile) return;
     const graph = behaviorGraphString ? (JSON.parse(behaviorGraphString) as GraphJSON) : emptyGraphJson();
 
-    (async () => {
-      let modelFile: ModelFile;
+    handleSetModelAndBehaviorGraph({
+      graph,
+      modelFile: uploadedModelFile,
+    });
 
-      if (typeof uploadedModelFile === 'string') {
-        modelFile = {
-          fileUrl: uploadedModelFile,
-          fileContents: undefined,
-          fileType: 'url',
-        };
-      } else {
-        const modelUrl = await dataUrlFromFile(uploadedModelFile);
-        modelFile = {
-          fileContents: modelUrl as string,
-          fileType: 'uploaded',
-          fileUrl: undefined,
-        };
-      }
+    // TODO better way to call fit vew after edges render
+    setTimeout(() => {
+      instance.fitView();
+    }, 100);
 
-      handleSetModelAndBehaviorGraph({
-        graph,
-        modelFile,
-      });
-
-      // TODO better way to call fit vew after edges render
-      setTimeout(() => {
-        instance.fitView();
-      }, 100);
-
-      handleClose();
-    })();
+    handleClose();
   }, [handleSetModelAndBehaviorGraph, behaviorGraphString, uploadedModelFile]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -192,11 +173,7 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
       })();
 
       (async () => {
-        const blob = await (await fetch(modelFileUrl)).blob();
-
-        const file = new File([blob], modelFile);
-
-        setUploadedModelFile(file);
+        setUploadedModelFile(await fetchModelFile(modelFileUrl, modelFile));
       })();
     }
   }, [selectedExample, exampleFileOptions]);

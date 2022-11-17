@@ -22,7 +22,7 @@ const OnChainWorld = ({
   tokenId: number;
 }) => {
   const gltf = useGLTF(sceneFileUrl);
-  const { sceneJson, sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
+  const { sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
     smartContractActions,
     gltf,
   });
@@ -53,7 +53,7 @@ const OnChainWorld = ({
       </nav>
 
       <div className="w-full h-full">
-        <Scene scene={sceneJson} animationsState={animations} onClickListeners={sceneOnClickListeners} />
+        <Scene gltf={gltf} animationsState={animations} onClickListeners={sceneOnClickListeners} />
       </div>
     </>
   );

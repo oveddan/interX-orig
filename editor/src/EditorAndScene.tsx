@@ -3,7 +3,8 @@ import FlowEditor from './flowEditor/FlowEditorApp';
 import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
 // import rawGraphJSON from './exampleGraphs/TokenGatedClick.json';
-import { GraphJSON } from 'behave-graph';
+import { ObjectMap } from '@react-three/fiber';
+import { GLTF } from 'three-stdlib';
 import '@rainbow-me/rainbowkit/styles.css';
 import { flowToBehave } from './flowEditor/transformers/flowToBehave';
 import useTokenContractAddress from './web3/useTokenContractAddressAndAbi';
@@ -15,6 +16,7 @@ import { VscSplitVertical, VscSplitHorizontal } from 'react-icons/vsc';
 import clsx from 'clsx';
 import Controls from './flowEditor/components/Controls';
 import useSaveAndLoad from './hooks/useSaveAndLoad';
+import GltfLoader from './scene/GltfLoader';
 
 type splitDirection = 'vertical' | 'horizontal';
 
@@ -67,17 +69,16 @@ function EditorAndScene() {
   const smartContractActions = useMockSmartContractActions();
   const saveAndLoadProps = useSaveAndLoad();
 
-  const { nodes, edges, gltf, onNodesChange, onEdgesChange } = saveAndLoadProps;
+  const [gltf, setGltf] = useState<GLTF & ObjectMap>();
 
-  const { sceneJson, scene, animations, sceneOnClickListeners, registry, specJson, lifecyleEmitter } =
-    useLoadSceneAndRegistry({
-      gltf,
-      smartContractActions,
-    });
+  const { nodes, edges, modelFile, onNodesChange, onEdgesChange, graphJson, setGraphJson } = saveAndLoadProps;
+
+  const { scene, animations, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
+    gltf,
+    smartContractActions,
+  });
 
   const [run, setRun] = useState(false);
-
-  const [graphJson, setGraphJson] = useState<GraphJSON>();
 
   useEffect(() => {
     if (!specJson) return;
@@ -159,7 +160,7 @@ function EditorAndScene() {
           {dimensions && (
             <div style={{ ...dimensions }} className="absolute z-40">
               <Scene
-                scene={sceneJson}
+                gltf={gltf}
                 onClickListeners={sceneOnClickListeners}
                 animationsState={animations}
                 {...dimensions}
@@ -168,6 +169,7 @@ function EditorAndScene() {
           )}
         </div>
       </SplitPane>
+      <GltfLoader fileUrl={modelFile?.dataUri} setGltf={setGltf} />
     </div>
   );
 }

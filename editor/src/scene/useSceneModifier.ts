@@ -1,5 +1,5 @@
 import { ObjectMap } from '@react-three/fiber';
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTF } from 'three-stdlib';
 import { Vec3, Vec4 } from 'behave-graph';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
@@ -298,10 +298,11 @@ const buildSceneModifier = (
 
 export type AnimationsState = { [key: string]: boolean };
 
-const useSceneModifier = (gltf: GLTF & ObjectMap, setOnClickListeners: Dispatch<SetStateAction<OnClickListeners>>) => {
+const useSceneModifier = (gltf: (GLTF & ObjectMap) | undefined) => {
   const [scene, setScene] = useState<IScene>();
 
   const [activeAnimations, setActiveAnimations] = useState<AnimationsState>({});
+  const [sceneOnClickListeners, setSceneOnClickListeners] = useState<OnClickListeners>({});
 
   useEffect(() => {
     // reset state on new active animations
@@ -320,11 +321,14 @@ const useSceneModifier = (gltf: GLTF & ObjectMap, setOnClickListeners: Dispatch<
   }, []);
 
   useEffect(() => {
-    console.log('buildling new scene modifier', gltf);
-    setScene(buildSceneModifier(gltf, setOnClickListeners, setAnimationActive));
-  }, [gltf, setOnClickListeners, setAnimationActive]);
+    if (!gltf) {
+      setScene(undefined);
+    } else {
+      setScene(buildSceneModifier(gltf, setSceneOnClickListeners, setAnimationActive));
+    }
+  }, [gltf, setSceneOnClickListeners, setAnimationActive]);
 
-  return { scene, animations: activeAnimations };
+  return { scene, animations: activeAnimations, sceneOnClickListeners };
 };
 
 export default useSceneModifier;

@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { modelOptions } from '../nav/Nav';
-import { useGLTF } from '@react-three/drei';
 import { GraphJSON } from 'behave-graph';
 import { behaveToFlow } from '../flowEditor/transformers/behaveToFlow';
 import { hasPositionMetaData } from '../flowEditor/util/hasPositionMetaData';
 import { autoLayout } from '../flowEditor/util/autoLayout';
 import { useNodesState, useEdgesState } from 'reactflow';
+import { examplePairs } from '../flowEditor/components/LoadModal';
 
 function readFileContents(file: File) {
   return new Promise<string | ArrayBuffer>((resolve, reject) => {
@@ -55,66 +55,74 @@ export type ModelFile =
       fileContents: string;
     };
 
+export const fetchModelFile = async (url: string, fileName: string) => {
+  const blob = await (await fetch(url)).blob();
+
+  const file = new File([blob], fileName);
+
+  return file;
+};
+
 const useSaveAndLoad = () => {
+  const [graphJson, setGraphJson] = useState<GraphJSON>();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const [modelFile, setModelFile] = useState<ModelFile>({
-    fileUrl: defaultModelUrl(),
-    fileType: 'url',
-    fileContents: undefined,
-  });
+  const [modelFile, setModelFile] = useState<{
+    file: File;
+    dataUri: string;
+  }>();
 
-  const handleLoadBehaviorGraphJson = useCallback((graph: GraphJSON) => {
-    const [nodes, edges] = behaveToFlow(graph);
+  const handleGraphJsonLoaded = useCallback((graphJson: GraphJSON) => {
+    if (!graphJson) return;
 
-    if (hasPositionMetaData(graph) === false) {
+    const [nodes, edges] = behaveToFlow(graphJson);
+
+    if (hasPositionMetaData(graphJson) === false) {
       autoLayout(nodes, edges);
     }
 
     setNodes(nodes);
     setEdges(edges);
+    setGraphJson(graphJson);
   }, []);
 
   const handleSetModelAndBehaviorGraph = useCallback(
-    ({ modelFile, graph }: { modelFile: ModelFile; graph: GraphJSON }) => {
-      setModelFile(modelFile);
-      handleLoadBehaviorGraphJson(graph);
+    async ({ modelFile, graph }: { modelFile: File; graph: GraphJSON }) => {
+      const modelFileDataUrl = (await dataUrlFromFile(modelFile)) as string;
+
+      setModelFile({
+        dataUri: modelFileDataUrl,
+        file: modelFile,
+      });
+      handleGraphJsonLoaded(graph);
     },
     []
   );
 
-  const handleLoadBehaviorGraph = useCallback(
-    (newValue: string) => {
-      const graph = JSON.parse(newValue) as GraphJSON;
-
-      handleLoadBehaviorGraphJson(graph);
-    },
-    [handleLoadBehaviorGraphJson]
-  );
-
   useEffect(() => {
-    const defaultGraph = publicUrl('/examples/graphs/ClickButtonToAnimate.json');
+    const [defaultModelFile, defaultGraphFile] = examplePairs[0];
+    const modelFileUrl = publicUrl(`/examples/models/${defaultModelFile}`);
+    const jsonFileUrl = publicUrl(`/examples/graphs/${defaultGraphFile}`);
+
     (async () => {
-      const fetched = await (await fetch(defaultGraph)).json();
-      handleLoadBehaviorGraphJson(fetched as GraphJSON);
+      const modelFile = await fetchModelFile(modelFileUrl, defaultModelFile);
+      const fetched = await (await fetch(jsonFileUrl)).json();
+
+      handleSetModelAndBehaviorGraph({ modelFile, graph: fetched as GraphJSON });
     })();
-  }, [handleLoadBehaviorGraph]);
-
-  const fileUrlToUse = modelFile.fileUrl || (modelFile.fileContents as string);
-
-  const gltf = useGLTF(fileUrlToUse);
+  }, [handleSetModelAndBehaviorGraph]);
 
   return {
-    gltf,
     handleSetModelAndBehaviorGraph,
-    handleLoadBehaviorGraph,
     setModelFile,
-    modelFileUrl: modelFile.fileUrl,
     nodes,
     edges,
     onEdgesChange,
     onNodesChange,
+    modelFile,
+    graphJson,
+    setGraphJson,
   };
 };
 

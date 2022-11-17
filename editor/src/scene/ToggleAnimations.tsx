@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAnimations } from '@react-three/drei';
 import { AnimationAction } from 'three';
 import { ObjectMap } from '@react-three/fiber';
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTF } from 'three-stdlib';
 import { AnimationsState } from './useSceneModifier';
 
 type AnimationActions = {
