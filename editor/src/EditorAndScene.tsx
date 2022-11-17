@@ -7,7 +7,6 @@ import { ObjectMap } from '@react-three/fiber';
 import { GLTF } from 'three-stdlib';
 import '@rainbow-me/rainbowkit/styles.css';
 import { flowToBehave } from './flowEditor/transformers/flowToBehave';
-import useTokenContractAddress from './web3/useTokenContractAddressAndAbi';
 import useLoadSceneAndRegistry from './hooks/useLoadSceneAndRegistry';
 import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
 import SplitPane from 'react-split-pane';
@@ -17,6 +16,7 @@ import clsx from 'clsx';
 import Controls from './flowEditor/components/Controls';
 import useSaveAndLoad from './hooks/useSaveAndLoad';
 import GltfLoader from './scene/GltfLoader';
+import Nav from './nav/Nav';
 
 type splitDirection = 'vertical' | 'horizontal';
 
@@ -65,7 +65,7 @@ const TogglePaneButtons = (props: TogglePangeButtonProps) => (
   </>
 );
 
-function EditorAndScene() {
+function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const smartContractActions = useMockSmartContractActions();
   const saveAndLoadProps = useSaveAndLoad();
 
@@ -97,8 +97,6 @@ function EditorAndScene() {
     setRun((existing) => !existing);
   }, []);
 
-  const contractAddress = useTokenContractAddress();
-
   const rightRef = useRef<HTMLDivElement | null>(null);
 
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>();
@@ -119,36 +117,40 @@ function EditorAndScene() {
     handleSplitResized();
   }, [handleSplitResized, splitDirection]);
 
+  const web3Controls = web3Enabled && <PublishingControls />;
+
   const controls = specJson && (
     <Controls toggleRun={toggleRun} specJson={specJson} running={run} {...saveAndLoadProps} />
   );
 
   return (
-    <div className="h-full w-full">
-      <div
-        className={clsx('absolute right-2 z-50', {
-          'top-14': splitDirection === 'horizontal',
-          'top-2': splitDirection === 'vertical',
-        })}
-      >
-        <TogglePaneButtons setSplitDirection={setSplitDirection} splitDirection={splitDirection} />
-      </div>
-      {/* @ts-ignore */}
-      <SplitPane split={splitDirection} defaultSize={800} onChange={handleSplitResized}>
-        <div className="w-full h-full">
-          {controls && scene && (
-            <FlowEditor
-              nodes={nodes}
-              onNodesChange={onNodesChange}
-              edges={edges}
-              onEdgesChange={onEdgesChange}
-              specJson={specJson}
-              scene={scene}
-              controls={controls}
-            />
-          )}
+    <>
+      {/* <Nav isWeb3Enabled={web3Enabled} /> */}
+      <div className="w-full h-full relative">
+        <div
+          className={clsx('absolute right-2 z-50', {
+            'top-14': splitDirection === 'horizontal',
+            'top-2': splitDirection === 'vertical',
+          })}
+        >
+          <TogglePaneButtons setSplitDirection={setSplitDirection} splitDirection={splitDirection} />
         </div>
-        {/* <div className="row-span-1">
+        {/* @ts-ignore */}
+        <SplitPane split={splitDirection} defaultSize={800} onChange={handleSplitResized}>
+          <div className="w-full h-full">
+            {controls && scene && (
+              <FlowEditor
+                nodes={nodes}
+                onNodesChange={onNodesChange}
+                edges={edges}
+                onEdgesChange={onEdgesChange}
+                specJson={specJson}
+                scene={scene}
+                controls={controls}
+              />
+            )}
+          </div>
+          {/* <div className="row-span-1">
             <Nav
               contractAddress={contractAddress}
               graphJson={graphJson}
@@ -156,28 +158,29 @@ function EditorAndScene() {
               setModelUrl={setModelUrl}
             />
           </div> */}
-        <div className="w-full h-full overflow-hidden" ref={rightRef}>
-          {dimensions && (
-            <div style={{ ...dimensions }} className="absolute z-40">
-              <Scene
-                gltf={gltf}
-                onClickListeners={sceneOnClickListeners}
-                animationsState={animations}
-                {...dimensions}
-              />
-            </div>
-          )}
-        </div>
-      </SplitPane>
-      <GltfLoader fileUrl={modelFile?.dataUri} setGltf={setGltf} />
-    </div>
+          <div className="w-full h-full overflow-hidden" ref={rightRef}>
+            {dimensions && (
+              <div style={{ ...dimensions }} className="absolute z-40">
+                <Scene
+                  gltf={gltf}
+                  onClickListeners={sceneOnClickListeners}
+                  animationsState={animations}
+                  {...dimensions}
+                />
+              </div>
+            )}
+          </div>
+        </SplitPane>
+        <GltfLoader fileUrl={modelFile?.dataUri} setGltf={setGltf} />
+      </div>
+    </>
   );
 }
 
-function EditorAndSceneWrapper() {
+function EditorAndSceneWrapper(props: { web3Enabled?: boolean }) {
   return (
     <Suspense fallback={null}>
-      <EditorAndScene />
+      <EditorAndScene {...props} />
     </Suspense>
   );
 }
