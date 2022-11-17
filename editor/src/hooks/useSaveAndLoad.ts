@@ -37,13 +37,13 @@ export const dataUrlFromFile = async (file: File) => {
   }
 };
 
-const publicImageUrl = (path: string) => new URL(path, import.meta.url).href;
+export const publicUrl = (path: string) => new URL(path, import.meta.url).href;
 
-const defaultModelUrl = () => publicImageUrl(`/examples/models/${modelOptions[0]}`);
+const defaultModelUrl = () => publicUrl(`/examples/models/${modelOptions[0]}`);
 
 export const emptyGraphJson = (): GraphJSON => ({});
 
-type ModelFile =
+export type ModelFile =
   | {
       fileUrl: string;
       fileType: 'url';
@@ -94,7 +94,7 @@ const useSaveAndLoad = () => {
   );
 
   useEffect(() => {
-    const defaultGraph = publicImageUrl('/examples/graphs/ClickButtonToAnimate.json');
+    const defaultGraph = publicUrl('/examples/graphs/ClickButtonToAnimate.json');
     (async () => {
       const fetched = await (await fetch(defaultGraph)).json();
       handleLoadBehaviorGraphJson(fetched as GraphJSON);

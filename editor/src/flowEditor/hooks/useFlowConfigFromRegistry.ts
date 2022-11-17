@@ -7,13 +7,11 @@ import getCustomNodeTypes from '../util/getCustomNodeTypes';
 import { getNodePickerFilters } from '../util/getPickerFilters';
 
 const useFlowConfigFromRegistry = ({
-  registry,
   nodes,
   lastConnectStart,
   specJson,
   scene,
 }: {
-  registry: Registry | undefined;
   nodes: Node<any>[];
   lastConnectStart: OnConnectStartParams | undefined;
   specJson: NodeSpecJSON[];
@@ -22,10 +20,6 @@ const useFlowConfigFromRegistry = ({
   const [filters, setFilters] = useState<NodePickerFilters | undefined>();
 
   const [customNodeTypes, setCustomNodeTypes] = useState<NodeTypes>();
-
-  useEffect(() => {
-    if (!registry) return;
-  }, [registry]);
 
   useEffect(() => {
     if (!specJson) return;

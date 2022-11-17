@@ -8,6 +8,7 @@ import Scene from '../scene/Scene';
 import useTokenContractAddress from '../web3/useTokenContractAddressAndAbi';
 import useSmartContractActions from './useSmartContractActions';
 import { ISmartContractActions } from '../abstractions';
+import { useGLTF } from '@react-three/drei';
 
 const OnChainWorld = ({
   graphJson,
@@ -20,9 +21,10 @@ const OnChainWorld = ({
   smartContractActions: ISmartContractActions;
   tokenId: number;
 }) => {
+  const gltf = useGLTF(sceneFileUrl);
   const { sceneJson, sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
-    modelUrl: sceneFileUrl,
     smartContractActions,
+    gltf,
   });
 
   useSceneModificationEngine({

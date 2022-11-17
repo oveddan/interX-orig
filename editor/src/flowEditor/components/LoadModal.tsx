@@ -4,15 +4,32 @@ import { useReactFlow } from 'reactflow';
 import { Modal } from './Modal';
 import { useDropzone } from 'react-dropzone';
 
-// import ClickToAnimate from '../../exampleGraphs/ClickToAnimate.json';
-// import SpinningModel from '../../exampleGraphs/SpinningSuzanne.json';
-import { dataUrlFromFile, emptyGraphJson, SaveAndLoadParams } from '../../hooks/useSaveAndLoad';
+import { dataUrlFromFile, emptyGraphJson, ModelFile, publicUrl, SaveAndLoadParams } from '../../hooks/useSaveAndLoad';
 import ModelPreview from '../../scene/ModelPreview';
 
-const examples = {
-  // clickToAnimate: ClickToAnimate as unknown as GraphJSON,
-  // spinningModel: SpinningModel as unknown as GraphJSON,
-} as Record<string, GraphJSON>;
+const modelFiles = {
+  courtyard: 'CourtYard.glb',
+  pressButtonToStartElevator: 'PressButtonToStartElevator.gltf',
+  suzanne: 'SpinningSuzanne.gltf',
+};
+
+const graphFiles = {
+  animatedBuildingColor: 'animatedBuildingColor.json',
+  clickButtonToAnimate: 'ClickButtonToAnimate.json',
+  spinningSuzanne: 'SpinningSuzanne.json',
+  tokenGatedClick: 'TokenGatedClick.json',
+};
+
+const examplePairs: [string, string][] = [
+  [modelFiles.pressButtonToStartElevator, graphFiles.clickButtonToAnimate],
+  [modelFiles.courtyard, graphFiles.animatedBuildingColor],
+  [modelFiles.suzanne, graphFiles.spinningSuzanne],
+  [modelFiles.suzanne, graphFiles.tokenGatedClick],
+];
+// const examples = {
+//   // clickToAnimate: ClickToAnimate as unknown as GraphJSON,
+//   // spinningModel: SpinningModel as unknown as GraphJSON,
+// } as Record<string, GraphJSON>;
 
 export type LoadModalProps = {
   open?: boolean;
@@ -70,8 +87,7 @@ const useDropZoneStyle = ({
 };
 
 export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSetModelAndBehaviorGraph }) => {
-  const [value, setValue] = useState<string>();
-  const [selected, setSelected] = useState('');
+  const [behaviorGraphString, setBehaviorGraphString] = useState<string>();
 
   const [uploadedModelFile, setUploadedModelFile] = useState<File>();
 
@@ -81,24 +97,36 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
     // if reopening - clear the state
     if (open) {
       setUploadedModelFile(undefined);
-      setValue(undefined);
+      setBehaviorGraphString(undefined);
     }
   }, [open]);
 
   const handleLoad = useCallback(() => {
+    console.log('loading');
     if (!uploadedModelFile) return;
-    const graph = value ? (JSON.parse(value) as GraphJSON) : emptyGraphJson();
+    const graph = behaviorGraphString ? (JSON.parse(behaviorGraphString) as GraphJSON) : emptyGraphJson();
 
     (async () => {
-      const modelUrl = await dataUrlFromFile(uploadedModelFile);
+      let modelFile: ModelFile;
 
-      handleSetModelAndBehaviorGraph({
-        graph,
-        modelFile: {
+      if (typeof uploadedModelFile === 'string') {
+        modelFile = {
+          fileUrl: uploadedModelFile,
+          fileContents: undefined,
+          fileType: 'url',
+        };
+      } else {
+        const modelUrl = await dataUrlFromFile(uploadedModelFile);
+        modelFile = {
           fileContents: modelUrl as string,
           fileType: 'uploaded',
           fileUrl: undefined,
-        },
+        };
+      }
+
+      handleSetModelAndBehaviorGraph({
+        graph,
+        modelFile,
       });
 
       // TODO better way to call fit vew after edges render
@@ -108,7 +136,7 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
 
       handleClose();
     })();
-  }, [handleSetModelAndBehaviorGraph, value, uploadedModelFile]);
+  }, [handleSetModelAndBehaviorGraph, behaviorGraphString, uploadedModelFile]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -129,10 +157,49 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
   });
 
   const handleClose = () => {
-    setValue(undefined);
-    setSelected('');
+    setBehaviorGraphString(undefined);
+    setSelectedExample('');
     onClose();
   };
+
+  const exampleFileOptions = useMemo(
+    () =>
+      examplePairs.map(([modelFile, behaviorFile], i) => ({
+        index: i,
+        text: `Model: ${modelFile} / Behavior: ${behaviorFile}`,
+        modelFile,
+        behaviorFile,
+      })),
+    []
+  );
+
+  const [selectedExample, setSelectedExample] = useState('');
+
+  useEffect(() => {
+    if (selectedExample !== '') {
+      const value = +selectedExample;
+
+      const { modelFile, behaviorFile } = exampleFileOptions[value];
+
+      const modelFileUrl = publicUrl(`/examples/models/${modelFile}`);
+      const jsonFileUrl = publicUrl(`/examples/graphs/${behaviorFile}`);
+
+      (async () => {
+        const fetched = await (await fetch(jsonFileUrl)).json();
+
+        const asJsonString = JSON.stringify(fetched, null, 2);
+        setBehaviorGraphString(asJsonString);
+      })();
+
+      (async () => {
+        const blob = await (await fetch(modelFileUrl)).blob();
+
+        const file = new File([blob], modelFile);
+
+        setUploadedModelFile(file);
+      })();
+    }
+  }, [selectedExample, exampleFileOptions]);
 
   return (
     <Modal
@@ -161,22 +228,24 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
           autoFocus
           className="border border-gray-300 p-2 align-top"
           placeholder="Paste Behave Graph JSON here"
-          value={value}
-          onChange={(e) => setValue(e.currentTarget.value)}
+          value={behaviorGraphString}
+          onChange={(e) => setBehaviorGraphString(e.currentTarget.value)}
         ></textarea>
       </div>
       <div className="p-4 text-center text-gray-800">or</div>
       <select
         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded block w-full p-3"
-        onChange={(e) => setSelected(e.target.value)}
-        value={selected}
-        disabled={!uploadedModelFile}
+        onChange={(e) => setSelectedExample(e.target.value)}
+        value={selectedExample}
       >
         <option disabled value="">
           Select an example
         </option>
-        <option value="spinningModel">Spinning Mdoel</option>
-        <option value="clickToAnimate">Click to Animate</option>
+        {exampleFileOptions.map(({ index, text }) => (
+          <option key={index} value={index}>
+            {text}
+          </option>
+        ))}
       </select>
     </Modal>
   );

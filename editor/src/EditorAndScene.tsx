@@ -137,7 +137,6 @@ function EditorAndScene() {
         <div className="w-full h-full">
           {controls && scene && (
             <FlowEditor
-              registry={registry}
               nodes={nodes}
               onNodesChange={onNodesChange}
               edges={edges}

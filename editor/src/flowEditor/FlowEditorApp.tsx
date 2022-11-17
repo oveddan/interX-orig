@@ -20,7 +20,6 @@ import useFlowConfigFromRegistry from './hooks/useFlowConfigFromRegistry';
 import { IScene } from '../abstractions';
 
 function Flow({
-  registry,
   nodes,
   onNodesChange,
   edges,
@@ -29,7 +28,6 @@ function Flow({
   scene,
   controls,
 }: {
-  registry: Registry | undefined;
   nodes: Node<any>[];
   onNodesChange: OnNodesChange;
   edges: Edge<any>[];
@@ -42,7 +40,6 @@ function Flow({
   const [lastConnectStart, setLastConnectStart] = useState<OnConnectStartParams>();
 
   const { filters, customNodeTypes } = useFlowConfigFromRegistry({
-    registry,
     nodes,
     lastConnectStart,
     specJson,
