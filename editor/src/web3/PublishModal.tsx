@@ -1,6 +1,6 @@
 import { GraphJSON } from 'behave-graph';
 import { FC, useState, useEffect, useCallback } from 'react';
-import ModelPreview from '../scene/ModelPreview';
+import InteractiveModelPreview from '../scene/InteractiveModelPreview';
 import { useSaveSceneToIpfs } from '../hooks/useSaveSceneToIpfs';
 import useTokenContractAddress from './useTokenContractAddress';
 import { MintWorldReturn } from '../hooks/useMintWorld';
@@ -8,6 +8,7 @@ import { Modal } from '../flowEditor/components/Modal';
 import { Link } from 'react-router-dom';
 import MintWorld from './MintWorld';
 import { convertURIToHTTPS } from '../hooks/ipfs/ipfsUrlUtils';
+import { useNetwork } from 'wagmi';
 
 export type LoadModalProps = {
   open?: boolean;
@@ -63,37 +64,45 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
     onClose();
   };
 
+  const network = useNetwork();
+
   const contractAddress = useTokenContractAddress();
 
   return (
     <>
       <Modal
-        title="Mint to Chain"
+        title={<>Mint interactive scene to {network.chain?.name}</>}
         actions={[
-          { label: 'Cancel', onClick: handleClose },
-          { label: 'Mint', onClick: handleMint },
+          { label: 'Cancel', onClick: handleClose, disabled: saving || !!mintWorld?.isLoading },
+          { label: 'Mint', onClick: handleMint, disabled: saving || !!mintWorld?.isLoading || mintWorld?.isSuccess },
         ]}
         open={open}
         onClose={onClose}
         width="4/5"
       >
-        <div className="grid grid-cols-2 w-full h-32">
-          {modelFile && (
+        <div className="grid">
+          {modelFile && graphJson && (
             <div>
-              <ModelPreview file={modelFile} />
+              <InteractiveModelPreview file={modelFile} graphJson={graphJson} />
             </div>
           )}
-          <textarea
-            disabled
-            autoFocus
-            className="border border-gray-300 p-2 align-top"
-            placeholder="Paste Behave Graph JSON here"
-            value={graphJsonString || ''}
-            onChange={(e) => e.preventDefault()}
-          ></textarea>
+          {/* <label htmlFor="behavee-graph" className="block text-sm font-medium text-gray-700">
+            behave graph json
+          </label> */}
+          {/* <div className="mt-1">
+            <textarea
+              disabled
+              id="behave-graph"
+              name="behave-graph"
+              rows={5}
+              className="block w-full border-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              value={graphJsonString || ''}
+              onChange={(e) => e.preventDefault()}
+            />
+          </div> */}
         </div>
         <div className="p-4 text-center text-gray-800">
-          <>{saving && <p>'saving to ipfs...'</p>}</>
+          <>{saving && <p>saving to ipfs...</p>}</>
           <>
             {cid && (
               <p>
@@ -104,15 +113,17 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
             )}
             {mintWorld?.isError && <p>{mintWorld.error?.message}</p>}
             {mintWorld?.isLoading && <p>minting the world...</p>}
-            {mintWorld?.isSuccess && typeof mintWorld?.mintedTokenId === 'undefined' && (
-              <p>Successfully minted world </p>
-            )}
-            {typeof mintWorld?.mintedTokenId !== 'undefined' && (
-              <p>
-                <Link to={`/worlds/${mintWorld.mintedTokenId}`} className="underline">
-                  {`World minted with id: (${mintWorld.mintedTokenId})`}
-                </Link>
-              </p>
+            {mintWorld?.isSuccess && (
+              <>
+                <p>Successfully minted world </p>
+                {typeof mintWorld?.mintedTokenId === 'number' && (
+                  <p>
+                    <Link to={`/worlds/${mintWorld?.mintedTokenId}`} className="underline">
+                      {`World minted with id: (${mintWorld?.mintedTokenId})`}
+                    </Link>
+                  </p>
+                )}
+              </>
             )}
           </>
         </div>

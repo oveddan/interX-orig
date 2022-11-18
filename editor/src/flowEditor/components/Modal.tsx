@@ -13,7 +13,7 @@ export type ModalAction = {
 export type ModalProps = {
   open?: boolean;
   onClose: () => void;
-  title: string;
+  title: string | JSX.Element;
   subtitle?: string;
   actions: ModalAction[];
   width?: string;

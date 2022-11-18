@@ -74,12 +74,12 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
 
   const { nodes, edges, modelFile, onNodesChange, onEdgesChange, graphJson, setGraphJson } = saveAndLoadProps;
 
+  const [run, setRun] = useState(false);
+
   const { scene, animations, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
     gltf,
     smartContractActions,
   });
-
-  const [run, setRun] = useState(false);
 
   useEffect(() => {
     if (!specJson) return;
@@ -171,12 +171,7 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
           <div className="w-full h-full overflow-hidden" ref={rightRef}>
             {dimensions && (
               <div style={{ ...dimensions }} className="absolute z-40">
-                <Scene
-                  gltf={gltf}
-                  onClickListeners={sceneOnClickListeners}
-                  animationsState={animations}
-                  {...dimensions}
-                />
+                <Scene gltf={gltf} onClickListeners={sceneOnClickListeners} animationsState={animations} />
               </div>
             )}
           </div>
