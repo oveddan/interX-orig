@@ -5,7 +5,6 @@ import { useSaveSceneToIpfs } from '../hooks/useSaveSceneToIpfs';
 import useTokenContractAddress from './useTokenContractAddress';
 import { MintWorldReturn } from '../hooks/useMintWorld';
 import { Modal } from '../flowEditor/components/Modal';
-import { Link } from 'react-router-dom';
 import MintWorld from './MintWorld';
 import { convertURIToHTTPS } from '../hooks/ipfs/ipfsUrlUtils';
 import { useNetwork } from 'wagmi';
@@ -43,13 +42,6 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
   const [mintWorld, setMintWorld] = useState<MintWorldReturn | null>(null);
 
   const [mintingToChain, setMintingToChain] = useState(false);
-
-  // useWhyDidYouUpdate('mint', {
-  //   mint: mintWorld?.mint,
-  //   cid,
-  //   startMinting,
-  //   graphJson,
-  // });
 
   useEffect(() => {
     if (!startMinting || mintingToChain || mintWorld?.isError) return;
