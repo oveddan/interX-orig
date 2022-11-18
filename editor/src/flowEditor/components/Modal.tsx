@@ -1,5 +1,7 @@
 import { FC, PropsWithChildren } from 'react';
+import { createPortal } from 'react-dom';
 import { useOnPressKey } from '../hooks/useOnPressKey';
+import clsx from 'clsx';
 
 export type ModalAction = {
   label: string;
@@ -12,12 +14,37 @@ export type ModalProps = {
   title: string;
   actions: ModalAction[];
   width?: string;
+  container: HTMLElement;
 };
 
 const actionColors = {
   primary: 'bg-teal-400 hover:bg-teal-500',
   secondary: 'bg-gray-400 hover:bg-gray-500',
 };
+
+const CloseButton = ({ onClose }: Pick<ModalProps, 'onClose'>) => (
+  <button
+    type="button"
+    className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+    data-modal-toggle="authentication-modal"
+    onClick={onClose}
+  >
+    <svg
+      aria-hidden="true"
+      className="w-5 h-5"
+      fill="currentColor"
+      viewBox="0 0 20 20"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+        clip-rule="evenodd"
+      ></path>
+    </svg>
+    <span className="sr-only">Close modal</span>
+  </button>
+);
 
 export const Modal: FC<PropsWithChildren<ModalProps>> = ({
   open = false,
@@ -26,37 +53,93 @@ export const Modal: FC<PropsWithChildren<ModalProps>> = ({
   children,
   actions,
   width = '96',
+  container,
 }) => {
   useOnPressKey('Escape', onClose);
 
   if (open === false) return null;
 
-  return (
+  return createPortal(
     <>
       <div
-        className="z-[19] fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
-        onClick={onClose}
-      ></div>
-      <div className={`z-20 relative top-20 mx-auto border w-${width} shadow-lg bg-white text-sm rounded-md`}>
-        <div className="p-3 border-b">
-          <h2 className="text-lg text-center font-bold">{title}</h2>
+        tabIndex={-1}
+        aria-hidden={!open}
+        className={clsx(
+          'overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 p-4 w-full md:inset-0 h-modal md:h-full flex',
+          {
+            hidden: !open,
+          }
+        )}
+      >
+        {/* <div className="relative w-full h-full grid grid-cols-1 place-content-center"> */}
+        <div className={`bg-white rounded-lg shadow dark:bg-gray-700 w-96 shrink`}>
+          <CloseButton onClose={onClose} />
+
+          <div className="py-6 px-6 lg:px-8 w-full">
+            <h3 className="mb-4 text-xl font-medium text-gray-900 dark:text-white">{title}</h3>
+
+            {children}
+            <div className="flex gap-3 p-3 border-t">
+              {actions.map((action, ix) => (
+                <button
+                  key={ix}
+                  className={
+                    'text-white p-2 w-full cursor-pointer ' +
+                    (ix === actions.length - 1 ? actionColors.primary : actionColors.secondary)
+                  }
+                  onClick={action.onClick}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="p-3">{children}</div>
-        <div className="flex gap-3 p-3 border-t">
-          {actions.map((action, ix) => (
-            <button
-              key={ix}
-              className={
-                'text-white p-2 w-full cursor-pointer ' +
-                (ix === actions.length - 1 ? actionColors.primary : actionColors.secondary)
-              }
-              onClick={action.onClick}
-            >
-              {action.label}
-            </button>
-          ))}
-        </div>
+        {/* </div> */}
       </div>
-    </>
+    </>,
+    container
   );
 };
+
+{
+  /*
+ <div id="authentication-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 p-4 w-full md:inset-0 h-modal md:h-full">
+    <div class="relative w-full max-w-md h-full md:h-auto">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white" data-modal-toggle="authentication-modal">
+                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="py-6 px-6 lg:px-8">
+                <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Sign in to our platform</h3>
+                <form class="space-y-6" action="#">
+                    <div>
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
+                        <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="name@company.com" required>
+                    </div>
+                    <div>
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+                        <input type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                    </div>
+                    <div class="flex justify-between">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="remember" type="checkbox" value="" class="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-3 focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800" required>
+                            </div>
+                            <label for="remember" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Remember me</label>
+                        </div>
+                        <a href="#" class="text-sm text-blue-700 hover:underline dark:text-blue-500">Lost Password?</a>
+                    </div>
+                    <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login to your account</button>
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+                        Not registered? <a href="#" class="text-blue-700 hover:underline dark:text-blue-500">Create account</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>  
+*/
+}

@@ -26,11 +26,13 @@ const CustomControls = ({
   running,
   handleSetModelAndBehaviorGraph,
   additionalControls = null,
+  rootNode,
 }: {
   toggleRun: () => void;
   specJson: NodeSpecJSON[];
   running: boolean;
   additionalControls?: JSX.Element | null;
+  rootNode: HTMLElement | null;
 } & Pick<SaveAndLoadParams, 'handleSetModelAndBehaviorGraph'>) => {
   const [loadModalOpen, setLoadModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
@@ -57,14 +59,19 @@ const CustomControls = ({
         </ControlButton>
         {additionalControls}
       </Controls>
-      <LoadModal
-        open={loadModalOpen}
-        onClose={() => setLoadModalOpen(false)}
-        handleSetModelAndBehaviorGraph={handleSetModelAndBehaviorGraph}
-      />
-      <SaveModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} specJson={specJson} />
-      <HelpModal open={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
-      <ClearModal open={clearModalOpen} onClose={() => setClearModalOpen(false)} />
+      {rootNode && (
+        <>
+          <LoadModal
+            open={loadModalOpen}
+            onClose={() => setLoadModalOpen(false)}
+            handleSetModelAndBehaviorGraph={handleSetModelAndBehaviorGraph}
+            container={rootNode}
+          />
+          <SaveModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} specJson={specJson} />
+          <HelpModal open={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
+          <ClearModal open={clearModalOpen} onClose={() => setClearModalOpen(false)} />
+        </>
+      )}
     </>
   );
 };

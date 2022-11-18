@@ -8,31 +8,6 @@ import { Modal } from '../flowEditor/components/Modal';
 import { Link } from 'react-router-dom';
 import MintWorld from './MintWorld';
 import { convertURIToHTTPS } from '../hooks/ipfs/ipfsUrlUtils';
-import { useWhyDidYouUpdate } from 'use-why-did-you-update';
-
-const modelFiles = {
-  courtyard: 'CourtYard.glb',
-  pressButtonToStartElevator: 'PressButtonToStartElevator.gltf',
-  suzanne: 'SpinningSuzanne.gltf',
-};
-
-const graphFiles = {
-  animatedBuildingColor: 'animatedBuildingColor.json',
-  clickButtonToAnimate: 'ClickButtonToAnimate.json',
-  spinningSuzanne: 'SpinningSuzanne.json',
-  tokenGatedClick: 'TokenGatedClick.json',
-};
-
-export const examplePairs: [string, string][] = [
-  [modelFiles.pressButtonToStartElevator, graphFiles.clickButtonToAnimate],
-  [modelFiles.courtyard, graphFiles.animatedBuildingColor],
-  [modelFiles.suzanne, graphFiles.spinningSuzanne],
-  [modelFiles.suzanne, graphFiles.tokenGatedClick],
-];
-// const examples = {
-//   // clickToAnimate: ClickToAnimate as unknown as GraphJSON,
-//   // spinningModel: SpinningModel as unknown as GraphJSON,
-// } as Record<string, GraphJSON>;
 
 export type LoadModalProps = {
   open?: boolean;

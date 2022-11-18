@@ -34,6 +34,7 @@ export const examplePairs: [string, string][] = [
 export type LoadModalProps = {
   open?: boolean;
   onClose: () => void;
+  container: HTMLElement;
 } & Pick<SaveAndLoadParams, 'handleSetModelAndBehaviorGraph'>;
 
 const baseStyle = {
@@ -86,7 +87,7 @@ const useDropZoneStyle = ({
   return style;
 };
 
-export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSetModelAndBehaviorGraph }) => {
+export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSetModelAndBehaviorGraph, container }) => {
   const [behaviorGraphString, setBehaviorGraphString] = useState<string>();
 
   const [uploadedModelFile, setUploadedModelFile] = useState<File>();
@@ -188,6 +189,7 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
       open={open}
       onClose={onClose}
       width="4/5"
+      container={container}
     >
       <div className="grid grid-cols-2 w-full h-32">
         {!uploadedModelFile && (

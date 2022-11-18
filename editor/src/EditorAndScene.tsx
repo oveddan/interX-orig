@@ -114,6 +114,8 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
 
   const [splitDirection, setSplitDirection] = useState<splitDirection>('vertical');
 
+  const [rootNode, setRootNode] = useState<HTMLDivElement | null>(null);
+
   useEffect(() => {
     handleSplitResized();
   }, [handleSplitResized, splitDirection]);
@@ -127,13 +129,14 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
       running={run}
       {...saveAndLoadProps}
       additionalControls={web3Controls}
+      rootNode={rootNode}
     />
   );
 
   return (
     <>
       <Nav isWeb3Enabled={web3Enabled} />
-      <div className="w-full h-full relative">
+      <div className="w-full h-full relative" ref={setRootNode}>
         <div
           className={clsx('absolute right-2 z-50', {
             'top-14': splitDirection === 'horizontal',
