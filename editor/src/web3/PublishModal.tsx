@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import MintWorld from './MintWorld';
 import { convertURIToHTTPS } from '../hooks/ipfs/ipfsUrlUtils';
 import { useNetwork } from 'wagmi';
+import { publicUrl } from '../hooks/useSaveAndLoad';
 
 export type LoadModalProps = {
   open?: boolean;
@@ -66,6 +67,10 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
     if (!cantClose) onClose();
   }, [cantClose]);
 
+  const navigateToMintedWorld = useCallback(() => {
+    window.location.href = publicUrl(`/worlds/${mintWorld?.mintedTokenId}`);
+  }, [mintWorld?.mintedTokenId]);
+
   const network = useNetwork();
 
   const contractAddress = useTokenContractAddress();
@@ -74,14 +79,19 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
     <>
       <Modal
         title={<>Mint interactive scene to {network.chain?.name}</>}
-        actions={[
-          { label: 'Cancel', onClick: handleClose, disabled: savingToIpfs || !!mintWorld?.isLoading },
-          {
-            label: 'Mint',
-            onClick: handleMint,
-            disabled: savingToIpfs || !!mintWorld?.isLoading || mintWorld?.isSuccess,
-          },
-        ]}
+        subtitle="Save this 3d scene and interactive behavior graph in the interoperable glb + behave-graph format, then mint a token for this scene, with smart contract-based actions occuring on chain."
+        actions={
+          !!mintWorld?.isSuccess
+            ? [{ label: 'View Minted World', onClick: navigateToMintedWorld }]
+            : [
+                { label: 'Cancel', onClick: handleClose, disabled: savingToIpfs || !!mintWorld?.isLoading },
+                {
+                  label: 'Mint',
+                  onClick: handleMint,
+                  disabled: savingToIpfs || !!mintWorld?.isLoading || mintWorld?.isSuccess,
+                },
+              ]
+        }
         open={open}
         onClose={handleClose}
         width="4/5"
@@ -108,27 +118,23 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
           </div> */}
         </div>
         <div className="p-4 text-center text-gray-800">
-          <>{savingToIpfs && <p>saving to ipfs...</p>}</>
+          <>{savingToIpfs && <p>Saving to ipfs...</p>}</>
           <>
             {cid && (
-              <p>
-                <a href={convertURIToHTTPS(`ipfs://${cid}`)} className="underline">
-                  Saved to Ipfs
-                </a>
-              </p>
+              <>
+                <p>Saved to IPFS</p>
+                <p>
+                  <a href={convertURIToHTTPS(`ipfs://${cid}`)} className="underline">
+                    View saved files saved on IPFS
+                  </a>
+                </p>
+              </>
             )}
             {mintWorld?.isError && <p>{mintWorld.error?.message}</p>}
             {mintWorld?.isLoading && <p>minting the world...</p>}
             {mintWorld?.isSuccess && (
               <>
                 <p>Successfully minted world </p>
-                {typeof mintWorld?.mintedTokenId === 'number' && (
-                  <p>
-                    <Link to={`/worlds/${mintWorld?.mintedTokenId}`} className="underline">
-                      {`World minted with id: (${mintWorld?.mintedTokenId})`}
-                    </Link>
-                  </p>
-                )}
               </>
             )}
           </>

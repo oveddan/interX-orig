@@ -76,14 +76,15 @@ export const Modal: FC<PropsWithChildren<ModalProps>> = ({
                   </div>
                 </div>
                 <div className="text-sm mt-2">{children}</div>
-                <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                <div className={`mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-${actions.length} sm:gap-3`}>
                   {actions.map((action, ix) => (
                     <button
                       key={ix}
                       className={clsx('disabled:opacity-50', {
-                        'inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-2 sm:text-sm':
+                        [`sm:col-start-${ix + 1}`]: actions.length > 1,
+                        'inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm':
                           ix === actions.length - 1,
-                        'mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-1 sm:mt-0 sm:text-sm':
+                        'mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:text-sm':
                           ix !== actions.length - 1,
                       })}
                       onClick={action.onClick}
