@@ -18,7 +18,7 @@ export type LoadModalProps = {
 };
 
 export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJson, modelFile }) => {
-  const { cid, saveSceneToIpfs, saving } = useSaveSceneToIpfs({ modelFile, behaviorGraph: graphJson });
+  const { cid, saveSceneToIpfs, saving: savingToIpfs } = useSaveSceneToIpfs({ modelFile, behaviorGraph: graphJson });
 
   const [graphJsonString, setGraphJsonString] = useState<string | null>(null);
 
@@ -60,9 +60,11 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
     }
   }, [mintWorld?.mint, cid, startMinting, mintingToChain, mintWorld?.isError]);
 
-  const handleClose = () => {
-    onClose();
-  };
+  const cantClose = !!mintWorld?.isSuccess || !!mintWorld?.isLoading || savingToIpfs;
+
+  const handleClose = useCallback(() => {
+    if (!cantClose) onClose();
+  }, [cantClose]);
 
   const network = useNetwork();
 
@@ -73,11 +75,15 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
       <Modal
         title={<>Mint interactive scene to {network.chain?.name}</>}
         actions={[
-          { label: 'Cancel', onClick: handleClose, disabled: saving || !!mintWorld?.isLoading },
-          { label: 'Mint', onClick: handleMint, disabled: saving || !!mintWorld?.isLoading || mintWorld?.isSuccess },
+          { label: 'Cancel', onClick: handleClose, disabled: savingToIpfs || !!mintWorld?.isLoading },
+          {
+            label: 'Mint',
+            onClick: handleMint,
+            disabled: savingToIpfs || !!mintWorld?.isLoading || mintWorld?.isSuccess,
+          },
         ]}
         open={open}
-        onClose={onClose}
+        onClose={handleClose}
         width="4/5"
       >
         <div className="grid">
@@ -102,7 +108,7 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
           </div> */}
         </div>
         <div className="p-4 text-center text-gray-800">
-          <>{saving && <p>saving to ipfs...</p>}</>
+          <>{savingToIpfs && <p>saving to ipfs...</p>}</>
           <>
             {cid && (
               <p>
