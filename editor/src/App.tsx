@@ -3,7 +3,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit';
 import { WagmiConfig } from 'wagmi';
 import EditorAndScene from './EditorAndScene';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { RouterProvider, createHashRouter } from 'react-router-dom';
 import OnChainWorldWrapper from './onChainWorld/OnChainWorld';
 
 const Web3Wrapper = ({ children }: { children: JSX.Element | JSX.Element[] }) => (
@@ -12,7 +12,7 @@ const Web3Wrapper = ({ children }: { children: JSX.Element | JSX.Element[] }) =>
   </WagmiConfig>
 );
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: '/',
     element: (
