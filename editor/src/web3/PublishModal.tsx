@@ -1,5 +1,6 @@
 import { GraphJSON } from 'behave-graph';
 import { FC, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import InteractiveModelPreview from '../scene/InteractiveModelPreview';
 import { useSaveSceneToIpfs } from '../hooks/useSaveSceneToIpfs';
 import useTokenContractAddress from './useTokenContractAddress';
@@ -59,9 +60,11 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
     if (!cantClose) onClose();
   }, [cantClose]);
 
+  const navigate = useNavigate();
+
   const navigateToMintedWorld = useCallback(() => {
-    window.location.href = publicUrl(`/worlds/${mintWorld?.mintedTokenId}`);
-  }, [mintWorld?.mintedTokenId]);
+    navigate(`/worlds/${mintWorld?.mintedTokenId}`);
+  }, [mintWorld?.mintedTokenId, navigate]);
 
   const network = useNetwork();
 
@@ -74,7 +77,13 @@ export const PublishModal: FC<LoadModalProps> = ({ open = false, onClose, graphJ
         subtitle="Save this 3d scene and interactive behavior graph in the interoperable glb + behave-graph format, then mint a token for this scene, with smart contract-based actions occuring on chain."
         actions={
           !!mintWorld?.isSuccess
-            ? [{ label: 'View Minted World', onClick: navigateToMintedWorld }]
+            ? [
+                {
+                  label: 'View Minted World',
+                  onClick: navigateToMintedWorld,
+                  disabled: typeof mintWorld?.mintedTokenId !== 'number',
+                },
+              ]
             : [
                 { label: 'Cancel', onClick: handleClose, disabled: savingToIpfs || !!mintWorld?.isLoading },
                 {
