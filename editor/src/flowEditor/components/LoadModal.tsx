@@ -34,7 +34,6 @@ export const examplePairs: [string, string][] = [
 export type LoadModalProps = {
   open?: boolean;
   onClose: () => void;
-  container: HTMLElement;
 } & Pick<SaveAndLoadParams, 'handleSetModelAndBehaviorGraph'>;
 
 const baseStyle = {
@@ -87,7 +86,7 @@ const useDropZoneStyle = ({
   return style;
 };
 
-export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSetModelAndBehaviorGraph, container }) => {
+export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSetModelAndBehaviorGraph }) => {
   const [behaviorGraphString, setBehaviorGraphString] = useState<string>();
 
   const [uploadedModelFile, setUploadedModelFile] = useState<File>();
@@ -184,14 +183,12 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
       title="Load Model and Behave Graph"
       actions={[
         { label: 'Cancel', onClick: handleClose },
-        { label: 'Load', onClick: handleLoad },
+        { label: 'Load', onClick: handleLoad, disabled: !uploadedModelFile },
       ]}
       open={open}
       onClose={onClose}
-      width="4/5"
-      container={container}
     >
-      <div className="grid grid-cols-2 w-full h-32">
+      <div className="grid grid-rows-2 w-full gap-2">
         {!uploadedModelFile && (
           <div {...getRootProps({ style })}>
             <input {...getInputProps()} />
@@ -203,13 +200,22 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, handleSet
             <ModelPreview file={uploadedModelFile} />
           </div>
         )}
-        <textarea
-          autoFocus
-          className="border border-gray-300 p-2 align-top"
-          placeholder="Paste Behave Graph JSON here"
-          value={behaviorGraphString}
-          onChange={(e) => setBehaviorGraphString(e.currentTarget.value)}
-        ></textarea>
+        <div>
+          <label htmlFor="behavee-graph" className="block text-sm font-medium text-gray-700">
+            behave graph json
+          </label>
+          <div className="mt-1">
+            <textarea
+              id="behave-graph"
+              name="behave-graph"
+              rows={5}
+              className="block w-full border-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              value={behaviorGraphString}
+              onChange={(e) => setBehaviorGraphString(e.currentTarget.value)}
+            />
+          </div>
+          {/* <p className="mt-2 text-sm text-gray-500">Write a few sentences about yourself.</p> */}
+        </div>
       </div>
       <div className="p-4 text-center text-gray-800">or</div>
       <select

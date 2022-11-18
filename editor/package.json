@@ -12,6 +12,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.2.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@headlessui/react": "^1.7.4",
     "@rainbow-me/rainbowkit": "^0.7.1",
     "@react-three/drei": "^9.40.0",
     "@react-three/fiber": "^8.9.1",
