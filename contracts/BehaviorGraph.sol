@@ -46,7 +46,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         return "ipfs://";
     }
 
-    function safeMint(string memory sceneUri, Node[] calldata _nodes) public onlyOwner returns(uint256) {
+    function safeMint(string memory sceneUri, Node[] calldata _nodes) public returns(uint256) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         address to = msg.sender;
@@ -72,7 +72,7 @@ contract BehaviorGraph is ERC721, ERC721URIStorage, Ownable {
         return super.tokenURI(tokenId);
     } 
 
-     function _createNodes(uint256 tokenId, Node[] calldata _nodes) private onlyOwner {
+     function _createNodes(uint256 tokenId, Node[] calldata _nodes) private {
         for(uint256 i = 0; i < _nodes.length; i++) {
           Node calldata node = _nodes[i];
           _tokenNodes[tokenId][node.id] = node;

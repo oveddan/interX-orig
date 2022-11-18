@@ -3,11 +3,12 @@ import { useParams } from 'react-router-dom';
 import { useSceneModificationEngine } from '../hooks/behaviorFlow';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';
 import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
-import Web3Login from '../nav/Web3Login';
+import Web3Login from '../web3/Web3Login';
 import Scene from '../scene/Scene';
-import useTokenContractAddress from '../web3/useTokenContractAddressAndAbi';
+import useTokenContractAddress from '../web3/useTokenContractAddress';
 import useSmartContractActions from './useSmartContractActions';
 import { ISmartContractActions } from '../abstractions';
+import { useGLTF } from '@react-three/drei';
 
 const OnChainWorld = ({
   graphJson,
@@ -20,9 +21,10 @@ const OnChainWorld = ({
   smartContractActions: ISmartContractActions;
   tokenId: number;
 }) => {
-  const { sceneJson, sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
-    modelUrl: sceneFileUrl,
+  const gltf = useGLTF(sceneFileUrl);
+  const { sceneOnClickListeners, registry, lifecyleEmitter, animations } = useLoadSceneAndRegistry({
     smartContractActions,
+    gltf,
   });
 
   useSceneModificationEngine({
@@ -51,7 +53,7 @@ const OnChainWorld = ({
       </nav>
 
       <div className="w-full h-full">
-        <Scene scene={sceneJson} animationsState={animations} onClickListeners={sceneOnClickListeners} />
+        <Scene gltf={gltf} animationsState={animations} onClickListeners={sceneOnClickListeners} />
       </div>
     </>
   );

@@ -28,22 +28,6 @@ export const createJsonFileFromObject = (object: Object, fileName: string) => {
 export const modelFileName = 'model.gltf';
 export const behaviorGraphFileName = 'behavior-graph.json';
 
-export const makeIpfsWorldFiles = async ({
-  modelUrl,
-  behaviorGraph,
-}: {
-  modelUrl: string;
-  behaviorGraph: GraphJSON;
-}) => {
-  const modelFile = await createFileFromUrl(modelUrl, modelFileName);
-  const behaviorGraphFile = createJsonFileFromObject(behaviorGraph, behaviorGraphFileName);
-
-  return {
-    modelFile,
-    behaviorGraphFile,
-  };
-};
-
 const toFileInIpfsFolder = (cid: CIDString, file: File | undefined) => {
   if (!file) return undefined;
 
@@ -51,17 +35,19 @@ const toFileInIpfsFolder = (cid: CIDString, file: File | undefined) => {
 };
 
 export const saveInteractiveWorldToIpfs = async ({
-  modelUrl,
+  modelFile,
   behaviorGraph,
 }: {
-  modelUrl: string;
+  modelFile: File;
   behaviorGraph: GraphJSON;
 }) => {
-  const { modelFile, behaviorGraphFile } = await makeIpfsWorldFiles({ behaviorGraph, modelUrl });
+  const behaviorGraphFile = createJsonFileFromObject(behaviorGraph, behaviorGraphFileName);
 
   const client = makeWeb3StorageClient();
 
-  const cid = await client.put([modelFile, behaviorGraphFile]);
+  const renamedFile = new File([modelFile], modelFileName);
+
+  const cid = await client.put([renamedFile, behaviorGraphFile]);
 
   const modelFileUrl = toFileInIpfsFolder(cid, modelFile) as string;
   const behaviorGraphUrl = toFileInIpfsFolder(cid, behaviorGraphFile) as string;

@@ -2,10 +2,9 @@ import { OrbitControls, Stage, useCursor } from '@react-three/drei';
 import { Canvas, ObjectMap } from '@react-three/fiber';
 import { useCallback, useEffect, useRef, useState, memo } from 'react';
 import { Mesh, Object3D } from 'three';
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTF } from 'three-stdlib';
 import ToggleAnimations from './ToggleAnimations';
 import { AnimationsState, OnClickListener, OnClickListeners } from './useSceneModifier';
-import { useWhyDidYouUpdate } from 'use-why-did-you-update';
 
 const RegisterOnClickListenersOnElements = ({
   jsonPath,
@@ -47,21 +46,23 @@ const RegisterOnClickListenersOnElements = ({
 };
 
 type SceneProps = {
-  scene: GLTF & ObjectMap;
+  gltf?: GLTF & ObjectMap;
   onClickListeners: OnClickListeners;
   animationsState: AnimationsState;
 };
 
-const RegisterOnClickListeners = ({ onClickListeners, scene }: Pick<SceneProps, 'onClickListeners' | 'scene'>) => {
+const RegisterOnClickListeners = ({ onClickListeners, gltf }: Pick<SceneProps, 'onClickListeners' | 'gltf'>) => {
   const [hovered, setHovered] = useState(false);
   useCursor(hovered, 'pointer', 'auto');
+
+  if (!gltf) return null;
 
   return (
     <>
       {Object.entries(onClickListeners).map(([jsonPath, listeners]) => (
         <RegisterOnClickListenersOnElements
           key={jsonPath}
-          gltf={scene}
+          gltf={gltf}
           jsonPath={jsonPath}
           listeners={listeners}
           setHovered={setHovered}
@@ -71,18 +72,23 @@ const RegisterOnClickListeners = ({ onClickListeners, scene }: Pick<SceneProps, 
   );
 };
 
-const Scene = ({ scene, onClickListeners, animationsState }: SceneProps) => {
+const Scene = ({ gltf, onClickListeners, animationsState }: SceneProps) => {
   const [mainRef, setMainRef] = useState<Object3D | null>(null);
 
   return (
-    <Canvas className="w-full h-full">
+    <Canvas>
       <OrbitControls makeDefault target={mainRef?.position} />
-      <Stage shadows adjustCamera={false} intensity={1} environment="city" preset="rembrandt">
-        <primitive object={scene.scene} ref={setMainRef}>
-          <RegisterOnClickListeners scene={scene} onClickListeners={onClickListeners} />
-        </primitive>
-      </Stage>
-      <ToggleAnimations gltf={scene} animationsState={animationsState} />
+
+      {gltf && (
+        <>
+          <Stage shadows adjustCamera={false} intensity={1} environment="city" preset="rembrandt">
+            <primitive object={gltf.scene} ref={setMainRef}>
+              <RegisterOnClickListeners gltf={gltf} onClickListeners={onClickListeners} />
+            </primitive>
+          </Stage>
+          <ToggleAnimations gltf={gltf} animationsState={animationsState} />
+        </>
+      )}
     </Canvas>
   );
 };

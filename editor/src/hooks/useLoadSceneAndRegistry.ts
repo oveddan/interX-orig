@@ -1,26 +1,21 @@
-import { useState } from 'react';
-import { useGLTF } from '@react-three/drei';
+import { ObjectMap } from '@react-three/fiber';
+import { GLTF } from 'three-stdlib';
 import useSceneModifier, { OnClickListener, OnClickListeners } from '../scene/useSceneModifier';
 import { useRegistry } from './behaviorFlow';
 import { ISmartContractActions } from '../abstractions';
 
 const useLoadSceneAndRegistry = ({
-  modelUrl,
   smartContractActions,
+  gltf,
 }: {
-  modelUrl: string;
   smartContractActions: ISmartContractActions;
+  gltf?: GLTF & ObjectMap;
 }) => {
-  const gltf = useGLTF(modelUrl);
-
-  const [sceneOnClickListeners, setSceneOnClickListeners] = useState<OnClickListeners>({});
-
-  const { scene, animations } = useSceneModifier(gltf, setSceneOnClickListeners);
+  const { scene, animations, sceneOnClickListeners } = useSceneModifier(gltf);
 
   const { registry, specJson, lifecyleEmitter } = useRegistry({ scene, smartContractActions });
 
   return {
-    sceneJson: gltf,
     scene,
     animations,
     sceneOnClickListeners,
