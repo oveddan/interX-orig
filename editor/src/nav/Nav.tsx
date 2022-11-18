@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { AiFillGithub } from 'react-icons/ai';
 
-const menuItems: [string, string][] = [['Build Behavior Graph', '/']];
+const menuItems: [string, string][] = [['Build Behave Graph', '/']];
 
 const MenuItem = ({ name, link }: { name: string; link: string }) => (
   <li>
@@ -53,7 +53,7 @@ const MenuButton = () => (
 const Nav = ({ isWeb3Enabled }: { isWeb3Enabled?: boolean }) => {
   return (
     <nav className="bg-white border-gray-200 px-2 sm:px-4 py-0 dark:bg-gray-800 w-full">
-      <div className="container flex flex-wrap items-center justify-between mx-auto">
+      <div className="flex flex-wrap items-center justify-between mx-auto">
         <a href="/" className="flex items-center">
           <img src={publicUrl('/interx.png')} className="h-12" alt="Interx Logo" />
         </a>
