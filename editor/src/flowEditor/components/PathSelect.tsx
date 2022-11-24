@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { parseJsonPath, Path, toJsonPathString } from '../../scene/useSceneModifier';
-import { IScene, ResourceTypes } from '../../abstractions';
+import { ISceneWithQueries, ResourceTypes } from '../../abstractions';
 
 const PathSelect = ({
   value,
   onChange,
   getProperties,
   short,
-}: { value: string; onChange: (path: string | undefined) => void; short: boolean } & Pick<IScene, 'getProperties'>) => {
+}: { value: string; onChange: (path: string | undefined) => void; short: boolean } & Pick<
+  ISceneWithQueries,
+  'getProperties'
+>) => {
   const [initialValue] = useState<Path | undefined>(() => {
-    console.log('parsing:', value, short);
     if (value) {
       const result = parseJsonPath(value, short);
       return result;
@@ -31,8 +33,6 @@ const PathSelect = ({
       },
       short
     );
-
-    console.log('got json path string', jsonPath);
 
     onChange(jsonPath);
   }, [resourceType, elementId, property, onChange, short]);

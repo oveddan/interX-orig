@@ -23,7 +23,7 @@ const CustomControls = ({
   additionalControls?: JSX.Element | null;
   graphJson: GraphJSON | undefined;
   setBehaviorGraph: (value: GraphJSON) => void;
-  setModelFile: (file: File | undefined) => void;
+  setModelFile: (file: File) => void;
 }) => {
   const [loadModalOpen, setLoadModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);

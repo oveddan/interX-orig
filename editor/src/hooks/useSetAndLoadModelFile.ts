@@ -1,8 +1,8 @@
 import { GraphJSON } from '@behave-graph/core';
-import { ObjectMap } from '@react-three/fiber';
-import { useCallback, useEffect, useState } from 'react';
-import { GLTF } from 'three-stdlib';
+import { useCallback, useMemo, useState } from 'react';
 import { examplePairs } from '../flowEditor/components/LoadModal';
+import { suspend } from 'suspend-react';
+import { useGLTF } from '@react-three/drei';
 
 function readFileContents(file: File) {
   // eslint-disable-next-line promise/avoid-new
@@ -39,17 +39,10 @@ export const publicUrl = (path: string) => new URL(path, import.meta.url).href;
 
 export const emptyGraphJson = (): GraphJSON => ({});
 
-export type ModelFile =
-  | {
-      fileUrl: string;
-      fileType: 'url';
-      fileContents: undefined;
-    }
-  | {
-      fileUrl: undefined;
-      fileType: 'uploaded';
-      fileContents: string;
-    };
+type ModelFile = {
+  file: File;
+  dataUri: string;
+};
 
 export const fetchModelFile = async (url: string, fileName: string) => {
   // eslint-disable-next-line unicorn/no-await-expression-member
@@ -60,42 +53,36 @@ export const fetchModelFile = async (url: string, fileName: string) => {
   return file;
 };
 
-const useSetAndLoadModelFile = () => {
+const useSetAndLoadModelFile = ({ initialFileUrl }: { initialFileUrl: string }) => {
+  const initialModelFile = suspend(async () => {
+    const modelFile = await fetchModelFile(initialFileUrl, initialFileUrl);
+
+    const modelFileDataUrl = (await dataUrlFromFile(modelFile)) as string;
+
+    const result: ModelFile = {
+      file: modelFile,
+      dataUri: modelFileDataUrl,
+    };
+
+    return result;
+  }, [initialFileUrl]);
+
   const [modelFile, setModelFileAndDataUri] = useState<{
     file: File;
     dataUri: string;
-  }>();
+  }>(initialModelFile);
 
-  const [gltf, setGltf] = useState<(GLTF & ObjectMap) | undefined>();
+  const gltf = useGLTF(modelFile.dataUri);
 
-  const setModelFile = useCallback(async (modelFile: File | undefined) => {
-    if (!modelFile) {
-      setModelFileAndDataUri(undefined);
-      return;
-    }
+  const setModelFile = useCallback(async (modelFile: File) => {
     const modelFileDataUrl = (await dataUrlFromFile(modelFile)) as string;
     setModelFileAndDataUri({ file: modelFile, dataUri: modelFileDataUrl });
   }, []);
 
-  const setModelFileUrl = useCallback(async (fileUrl: string, fileName: string) => {
-    const modelFile = await fetchModelFile(fileUrl, fileName);
-
-    setModelFile(modelFile);
-  }, []);
-
-  useEffect(() => {
-    const [defaultModelFile] = examplePairs[0];
-    const modelFileUrl = publicUrl(`/examples/models/${defaultModelFile}`);
-
-    setModelFileUrl(modelFileUrl, defaultModelFile);
-  }, []);
-
   return {
-    setModelFileUrl,
     setModelFile,
     modelFile,
     gltf,
-    setGltf,
   };
 };
 

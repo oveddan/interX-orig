@@ -22,13 +22,13 @@ const graphFiles = {
   helloWorld: 'HelloWorld.json',
 };
 
-export const examplePairs: ([string, string] | [string])[] = [
+export const examplePairs: [string, string][] = [
   [modelFiles.pressButtonToStartElevator, graphFiles.clickButtonToAnimate],
   [modelFiles.suzanne, graphFiles.spinningSuzanne],
-  [graphFiles.helloWorld],
-  [graphFiles.delay],
-  [graphFiles.flipFlop],
-  [graphFiles.forLoop],
+  // [graphFiles.helloWorld],
+  // [graphFiles.delay],
+  // [graphFiles.flipFlop],
+  // [graphFiles.forLoop],
 ];
 
 const defaultSelectedIndex = '0';
@@ -58,7 +58,7 @@ export type LoadModalProps = {
   open?: boolean;
   onClose: () => void;
   setBehaviorGraph: (value: GraphJSON) => void;
-  setModelFile: (file: File | undefined) => void;
+  setModelFile: (file: File) => void;
 };
 
 const baseStyle = {
@@ -153,7 +153,7 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, setBehavi
 
     setBehaviorGraph(graph);
 
-    setModelFile(uploadedModelFile);
+    if (uploadedModelFile) setModelFile(uploadedModelFile);
 
     // TODO better way to call fit vew after edges render
     setTimeout(() => {
@@ -206,9 +206,8 @@ export const LoadModal: FC<LoadModalProps> = ({ open = false, onClose, setBehavi
   useEffect(() => {
     // by default, select first example and apply it
     (async () => {
-      const { behaviorGraph, modelFile } = await fetchExample(0);
+      const { behaviorGraph } = await fetchExample(0);
 
-      setModelFile(modelFile);
       setBehaviorGraph(behaviorGraph);
     })();
   }, []);

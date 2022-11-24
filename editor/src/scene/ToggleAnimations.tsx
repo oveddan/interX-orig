@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAnimations } from '@react-three/drei';
-import { AnimationAction } from 'three';
+import { ACESFilmicToneMapping, AnimationAction } from 'three';
 import { ObjectMap } from '@react-three/fiber';
 import { GLTF } from 'three-stdlib';
 import { AnimationsState } from './useSceneModifier';
+import { faRub } from '@fortawesome/free-solid-svg-icons';
 
 type AnimationActions = {
   [key: string]: AnimationAction | null;
@@ -23,25 +24,35 @@ const PlayAnimation = ({ name, actions, playing }: { name: string; actions: Anim
     };
   }, [action]);
 
+  const [hasPlayed, setHasPlayed] = useState(false);
+
   useEffect(() => {
+    if (!action) {
+      console.error('invalid action name', name, 'had actions:', actions);
+      return;
+    }
     if (playing) {
+      if (!hasPlayed) {
+        console.log('playing for the first time');
+        action.play();
+        setHasPlayed(true);
+      } else {
+        if (action.paused) {
+          console.log('unpausing');
+          action.paused = false;
+        }
+      }
+    } else {
+      if (!hasPlayed) return;
       if (!action) {
         console.error('invalid action name', name, 'had actions:', actions);
         return;
       }
 
-      if (action.paused) {
-        action.paused = false;
-      } else {
-        action.play();
-      }
-
-      // on stop playing, pause the action
-      return () => {
-        action.paused = true;
-      };
+      console.log('pausing');
+      action.paused = true;
     }
-  }, [name, actions, action, playing]);
+  }, [name, actions, action, playing, hasPlayed]);
 
   return null;
 };

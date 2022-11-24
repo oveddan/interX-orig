@@ -1,15 +1,32 @@
 import { GraphJSON, NodeSpecJSON } from '@behave-graph/core';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEdgesState, useNodesState } from 'reactflow';
+import { suspend } from 'suspend-react';
 
 // import { examplePairs } from '../components/LoadModal';
 import { behaveToFlow } from '../flowEditor/transformers/behaveToFlow';
 import { flowToBehave } from '../flowEditor/transformers/flowToBehave';
 import { autoLayout } from '../flowEditor/util/autoLayout';
 import { hasPositionMetaData } from '../flowEditor/util/hasPositionMetaData';
+import { publicUrl } from './useSaveAndLoad';
 
-const useBehaveGraphFlow = (specJson: NodeSpecJSON[] | undefined) => {
-  const [graphJson, setStoredGraphJson] = useState<GraphJSON>();
+const useBehaveGraphFlow = ({
+  initialGraphJsonUrl,
+  specJson,
+}: {
+  initialGraphJsonUrl: string | undefined;
+  specJson: NodeSpecJSON[] | undefined;
+}) => {
+  const keys = useMemo(() => [initialGraphJsonUrl], [initialGraphJsonUrl]);
+
+  const initialGraphJson = suspend(async () => {
+    if (!initialGraphJsonUrl) return;
+    const fetched = (await (await fetch(publicUrl(`/examples/graphs/${initialGraphJsonUrl}`))).json()) as GraphJSON;
+
+    return fetched;
+  }, keys);
+
+  const [graphJson, setStoredGraphJson] = useState<GraphJSON | undefined>(initialGraphJson);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
