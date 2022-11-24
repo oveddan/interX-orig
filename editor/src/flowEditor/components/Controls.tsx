@@ -8,7 +8,6 @@ import { LoadModal } from './LoadModal';
 import { SaveModal } from './SaveModal';
 import { Controls, ControlButton } from 'reactflow';
 import { GraphJSON } from '@behave-graph/core';
-import { SaveAndLoadParams } from '../../hooks/useSaveAndLoad';
 
 const CustomControls = ({
   toggleRun,

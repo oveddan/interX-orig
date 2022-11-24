@@ -2,13 +2,14 @@ import { GraphJSON, NodeSpecJSON } from '@behave-graph/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEdgesState, useNodesState } from 'reactflow';
 import { suspend } from 'suspend-react';
-
-// import { examplePairs } from '../components/LoadModal';
 import { behaveToFlow } from '../flowEditor/transformers/behaveToFlow';
 import { flowToBehave } from '../flowEditor/transformers/flowToBehave';
 import { autoLayout } from '../flowEditor/util/autoLayout';
 import { hasPositionMetaData } from '../flowEditor/util/hasPositionMetaData';
 import { publicUrl } from './useSaveAndLoad';
+
+export const exampleBehaveGraphFileUrl = (fileName: string) => publicUrl(`/examples/graphs/${fileName}`);
+export const fetchBehaviorGraphJson = async (url: string) => (await (await fetch(url)).json()) as GraphJSON;
 
 const useBehaveGraphFlow = ({
   initialGraphJsonUrl,
@@ -17,14 +18,10 @@ const useBehaveGraphFlow = ({
   initialGraphJsonUrl: string | undefined;
   specJson: NodeSpecJSON[] | undefined;
 }) => {
-  const keys = useMemo(() => [initialGraphJsonUrl], [initialGraphJsonUrl]);
-
   const initialGraphJson = suspend(async () => {
     if (!initialGraphJsonUrl) return;
-    const fetched = (await (await fetch(publicUrl(`/examples/graphs/${initialGraphJsonUrl}`))).json()) as GraphJSON;
-
-    return fetched;
-  }, keys);
+    return await fetchBehaviorGraphJson(initialGraphJsonUrl);
+  }, [initialGraphJsonUrl]);
 
   const [graphJson, setStoredGraphJson] = useState<GraphJSON | undefined>(initialGraphJson);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);

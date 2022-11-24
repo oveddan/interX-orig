@@ -4,8 +4,10 @@ import { useReactFlow } from 'reactflow';
 import { Modal } from './Modal';
 import { useDropzone } from 'react-dropzone';
 
-import { fetchModelFile, publicUrl } from '../../hooks/useSaveAndLoad';
+import { fetchModelFile } from '../../hooks/useSaveAndLoad';
 import ModelPreview from '../../scene/ModelPreview';
+import { exampleBehaveGraphFileUrl, fetchBehaviorGraphJson } from '../../hooks/useBehaveGraphFlow';
+import { exampleModelFileUrl } from '../../hooks/useSetAndLoadModelFile';
 
 const modelFiles = {
   courtyard: 'CourtYard.glb',
@@ -114,12 +116,12 @@ const useDropZoneStyle = ({
 export const fetchExample = async (exampleIndex: number) => {
   const { modelFile, behaviorFile } = buildExampleOptions()[exampleIndex];
 
-  const jsonFileUrl = publicUrl(`/examples/graphs/${behaviorFile}`);
-  const fetched = (await (await fetch(jsonFileUrl)).json()) as GraphJSON;
+  const jsonFileUrl = exampleBehaveGraphFileUrl(behaviorFile);
+  const fetched = await fetchBehaviorGraphJson(jsonFileUrl);
 
   let downloadedModelFile: File | undefined;
   if (modelFile) {
-    const modelFileUrl = publicUrl(`/examples/models/${modelFile}`);
+    const modelFileUrl = exampleModelFileUrl(modelFile);
     downloadedModelFile = await fetchModelFile(modelFileUrl, modelFile);
   } else {
     downloadedModelFile = undefined;

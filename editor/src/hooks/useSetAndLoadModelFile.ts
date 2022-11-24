@@ -53,6 +53,8 @@ export const fetchModelFile = async (url: string, fileName: string) => {
   return file;
 };
 
+export const exampleModelFileUrl = (fileName: string) => publicUrl(`/examples/models/${fileName}`);
+
 const useSetAndLoadModelFile = ({ initialFileUrl }: { initialFileUrl: string }) => {
   const initialModelFile = suspend(async () => {
     const modelFile = await fetchModelFile(initialFileUrl, initialFileUrl);

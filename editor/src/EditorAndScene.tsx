@@ -9,18 +9,18 @@ import Nav from './nav/Nav';
 import PublishingControls from './web3/PublishingControls';
 import useNodeSpecJson from './hooks/useNodeSpecJson';
 import useRegistry from './hooks/useRegistry';
-import useSetAndLoadModelFile from './hooks/useSetAndLoadModelFile';
-import useBehaveGraphFlow from './hooks/useBehaveGraphFlow';
+import useSetAndLoadModelFile, { exampleModelFileUrl } from './hooks/useSetAndLoadModelFile';
+import useBehaveGraphFlow, { exampleBehaveGraphFileUrl } from './hooks/useBehaveGraphFlow';
 import useEngine from './hooks/useEngine';
 import useSceneModifier from './scene/useSceneModifier';
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
-import { publicUrl } from './hooks/useSaveAndLoad';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 
-const initialModelFileUrl = publicUrl(`/examples/models/${initialModelFile}`);
+const initialModelFileUrl = exampleModelFileUrl(initialModelFile);
+const initialBehaviorGraphUrl = exampleBehaveGraphFileUrl(initialBehaviorGraph);
 
 function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const smartContractActions = useMockSmartContractActions();
@@ -37,7 +37,7 @@ function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const specJson = useNodeSpecJson(registry);
 
   const { nodes, edges, onNodesChange, onEdgesChange, graphJson, setGraphJson } = useBehaveGraphFlow({
-    initialGraphJsonUrl: initialBehaviorGraph,
+    initialGraphJsonUrl: initialBehaviorGraphUrl,
     specJson,
   });
 
