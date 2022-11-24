@@ -1,4 +1,4 @@
-import { GraphJSON, NodeParametersJSON, NodeParameterValueJSON } from 'behave-graph';
+import { GraphJSON, NodeParametersJSON, NodeParameterValueJSON } from '@behave-graph/core';
 import { useEffect, useState } from 'react';
 import { usePrepareContractWrite, useContractWrite, useContractEvent } from 'wagmi';
 import { abi } from '../contracts/abi';

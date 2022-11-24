@@ -1,4 +1,4 @@
-import { MouseEvent as ReactMouseEvent, useCallback, useMemo, useState } from 'react';
+import { MouseEvent as ReactMouseEvent, useCallback, useState } from 'react';
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -13,11 +13,11 @@ import ReactFlow, {
 import { v4 as uuidv4 } from 'uuid';
 import NodePicker from './components/NodePicker';
 import { calculateNewEdge } from './util/calculateNewEdge';
-import { NodeSpecJSON, Registry } from 'behave-graph';
+import { NodeSpecJSON } from '@behave-graph/core';
 import 'reactflow/dist/style.css';
 import './flowEditor.css';
 import useFlowConfigFromRegistry from './hooks/useFlowConfigFromRegistry';
-import { IScene } from '../abstractions';
+import { ISceneWithQueries } from '../abstractions';
 
 function Flow({
   nodes,
@@ -33,8 +33,8 @@ function Flow({
   edges: Edge<any>[];
   onEdgesChange: OnEdgesChange;
   specJson: NodeSpecJSON[];
-  scene: IScene;
-  controls: JSX.Element;
+  scene: ISceneWithQueries | undefined;
+  controls: JSX.Element | undefined;
 }) {
   const [nodePickerVisibility, setNodePickerVisibility] = useState<XYPosition>();
   const [lastConnectStart, setLastConnectStart] = useState<OnConnectStartParams>();

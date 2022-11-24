@@ -1,4 +1,4 @@
-import { GraphJSON } from 'behave-graph';
+import { GraphJSON } from '@behave-graph/core';
 import { useParams } from 'react-router-dom';
 import { useSceneModificationEngine } from '../hooks/behaviorFlow';
 import useLoadOnChainWorld from '../hooks/useLoadOnChainWorld';

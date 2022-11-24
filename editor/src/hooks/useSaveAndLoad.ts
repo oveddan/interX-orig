@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { GraphJSON } from 'behave-graph';
+import { GraphJSON } from '@behave-graph/core';
 import { behaveToFlow } from '../flowEditor/transformers/behaveToFlow';
 import { hasPositionMetaData } from '../flowEditor/util/hasPositionMetaData';
 import { autoLayout } from '../flowEditor/util/autoLayout';

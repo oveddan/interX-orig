@@ -30,8 +30,11 @@ const PlayAnimation = ({ name, actions, playing }: { name: string; actions: Anim
         return;
       }
 
-      if (action.paused) action.paused = false;
-      else action.play();
+      if (action.paused) {
+        action.paused = false;
+      } else {
+        action.play();
+      }
 
       // on stop playing, pause the action
       return () => {

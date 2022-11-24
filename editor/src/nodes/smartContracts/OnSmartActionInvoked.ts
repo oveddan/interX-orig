@@ -1,6 +1,5 @@
-import { Graph, Socket, Engine, Assert } from 'behave-graph';
-import { EventNode } from 'behave-graph/dist/lib/Nodes/EventNode';
-import { NodeDescription } from 'behave-graph/dist/lib/Nodes/Registry/NodeDescription';
+import { Graph, Socket, Engine, Assert } from '@behave-graph/core';
+import { EventNode, NodeDescription } from '@behave-graph/core';
 import { ISmartContractActions } from '../../abstractions';
 import { actionNameParamName } from './TokenGatedActionInvoker';
 

@@ -1,21 +1,20 @@
-import { NodeSpecJSON } from 'behave-graph';
-import { FC, useMemo, useRef, useState } from 'react';
-import { useEdges, useNodes } from 'reactflow';
-import { flowToBehave } from '../transformers/flowToBehave';
+import { GraphJSON } from '@behave-graph/core';
+import { FC, useEffect, useRef, useState } from 'react';
 import { Modal } from './Modal';
 
-export type SaveModalProps = { open?: boolean; onClose: () => void; specJson: NodeSpecJSON[] };
+export type SaveModalProps = { open?: boolean; onClose: () => void; graphJson: GraphJSON | undefined };
 
-export const SaveModal: FC<SaveModalProps> = ({ open = false, onClose, specJson }) => {
+export const SaveModal: FC<SaveModalProps> = ({ open = false, onClose, graphJson }) => {
   const ref = useRef<HTMLTextAreaElement>(null);
   const [copied, setCopied] = useState(false);
 
-  const edges = useEdges();
-  const nodes = useNodes();
+  const [jsonString, setJsonString] = useState('{}');
 
-  const flow = useMemo(() => flowToBehave({ nodes, edges, nodeSpecJSON: specJson }), [nodes, edges]);
-
-  const jsonString = JSON.stringify(flow, null, 2);
+  useEffect(() => {
+    if (!open) return;
+    if (!graphJson) setJsonString('{}');
+    else setJsonString(JSON.stringify(graphJson, null, 2));
+  }, [open, graphJson]);
 
   const handleCopy = () => {
     ref.current?.select();
@@ -37,7 +36,7 @@ export const SaveModal: FC<SaveModalProps> = ({ open = false, onClose, specJson 
       open={open}
       onClose={onClose}
     >
-      <textarea ref={ref} className="border border-gray-300 w-full p-2 h-32" defaultValue={jsonString}></textarea>
+      <textarea ref={ref} className="border border-gray-300 w-full p-2 h-32" value={jsonString}></textarea>
     </Modal>
   );
 };

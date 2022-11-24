@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { GraphJSON } from 'behave-graph';
+import { GraphJSON } from '@behave-graph/core';
 import useMintWorld, { MintWorldReturn } from '../hooks/useMintWorld';
 
 // this allows us to conditionally call useMintWorld with all required arguments passed

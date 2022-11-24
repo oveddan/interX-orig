@@ -1,7 +1,7 @@
 import { Node, OnConnectStartParams } from 'reactflow';
 import { NodePickerFilters } from '../components/NodePicker';
 import { getSocketsByNodeTypeAndHandleType } from './getSocketsByNodeTypeAndHandleType';
-import { NodeSpecJSON } from 'behave-graph';
+import { NodeSpecJSON } from '@behave-graph/core';
 
 export const getNodePickerFilters = (
   nodes: Node[],

@@ -10,7 +10,7 @@ import {
   readGraphFromJSON,
   registerCoreProfile,
   Registry,
-} from 'behave-graph';
+} from '@behave-graph/core';
 import { useEffect, useState } from 'react';
 import { getNodeSpecJSON } from '../flowEditor/util/getNodeSpecJSON';
 import { IScene, ISmartContractActions } from '../abstractions';

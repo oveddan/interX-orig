@@ -1,23 +1,23 @@
 import { Suspense, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import FlowEditor from './flowEditor/FlowEditorApp';
-import { useSceneModificationEngine } from './hooks/behaviorFlow';
 import Scene from './scene/Scene';
 // import rawGraphJSON from './exampleGraphs/TokenGatedClick.json';
-import { ObjectMap } from '@react-three/fiber';
-import { GLTF } from 'three-stdlib';
 import '@rainbow-me/rainbowkit/styles.css';
-import { flowToBehave } from './flowEditor/transformers/flowToBehave';
-import useLoadSceneAndRegistry from './hooks/useLoadSceneAndRegistry';
 import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
-import SplitPane from 'react-split-pane';
 import './styles/resizer.css';
 import { VscSplitVertical, VscSplitHorizontal } from 'react-icons/vsc';
 import clsx from 'clsx';
 import Controls from './flowEditor/components/Controls';
-import useSaveAndLoad from './hooks/useSaveAndLoad';
 import GltfLoader from './scene/GltfLoader';
 import Nav from './nav/Nav';
 import PublishingControls from './web3/PublishingControls';
+import useNodeSpecJson from './hooks/useNodeSpecJson';
+import useRegistry from './hooks/useRegistry';
+import useSetAndLoadModelFile from './hooks/useSetAndLoadModelFile';
+import useBehaveGraphFlow from './hooks/useBehaveGraphFlow';
+import useEngine from './hooks/useEngine';
+import useSceneModifier from './scene/useSceneModifier';
+import Flow from './flowEditor/FlowEditorApp';
+import SplitEditor from './SplitEditor';
 
 type splitDirection = 'vertical' | 'horizontal';
 
@@ -68,116 +68,61 @@ const TogglePaneButtons = (props: TogglePangeButtonProps) => (
 
 function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const smartContractActions = useMockSmartContractActions();
-  const saveAndLoadProps = useSaveAndLoad();
+  const { modelFile, setModelFile, gltf, setGltf } = useSetAndLoadModelFile();
 
-  const [gltf, setGltf] = useState<GLTF & ObjectMap>();
+  const { scene, animations, sceneOnClickListeners, registerSceneProfile } = useSceneModifier(gltf);
 
-  const { nodes, edges, modelFile, onNodesChange, onEdgesChange, graphJson, setGraphJson } = saveAndLoadProps;
-
-  const [run, setRun] = useState(false);
-
-  const { scene, animations, sceneOnClickListeners, registry, specJson, lifecyleEmitter } = useLoadSceneAndRegistry({
-    gltf,
-    smartContractActions,
+  const { registry, lifecyleEmitter } = useRegistry({
+    registerProfiles: registerSceneProfile,
   });
 
-  useEffect(() => {
-    if (!specJson) return;
-    const graphJson = flowToBehave({ nodes, edges, nodeSpecJSON: specJson });
-    setGraphJson(graphJson);
-  }, [nodes, edges, specJson]);
+  const specJson = useNodeSpecJson(registry);
 
-  useSceneModificationEngine({
+  const { nodes, edges, onNodesChange, onEdgesChange, graphJson, setGraphJson } = useBehaveGraphFlow(specJson);
+
+  const { togglePlay, playing } = useEngine({
     graphJson,
     registry,
     eventEmitter: lifecyleEmitter,
-    run,
   });
-
-  const toggleRun = useCallback(() => {
-    setRun((existing) => !existing);
-  }, []);
-
-  const rightRef = useRef<HTMLDivElement | null>(null);
-
-  const [dimensions, setDimensions] = useState<{ width: number; height: number }>();
-
-  const handleSplitResized = useCallback(() => {
-    if (rightRef.current) {
-      const boundingRect = rightRef.current.getBoundingClientRect();
-      setDimensions({
-        height: boundingRect.height,
-        width: boundingRect.width,
-      });
-    }
-  }, []);
-
-  const [splitDirection, setSplitDirection] = useState<splitDirection>('vertical');
-
-  const [rootNode, setRootNode] = useState<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    handleSplitResized();
-  }, [handleSplitResized, splitDirection]);
 
   const web3Controls = web3Enabled ? <PublishingControls graphJson={graphJson} modelFile={modelFile?.file} /> : null;
 
   const controls = specJson && (
     <Controls
-      toggleRun={toggleRun}
-      specJson={specJson}
-      running={run}
-      {...saveAndLoadProps}
+      toggleRun={togglePlay}
+      graphJson={graphJson}
+      running={playing}
       additionalControls={web3Controls}
-      rootNode={rootNode}
+      setBehaviorGraph={setGraphJson}
+      setModelFile={setModelFile}
     />
+  );
+
+  const flowEditor = specJson && (
+    <Flow
+      nodes={nodes}
+      onNodesChange={onNodesChange}
+      edges={edges}
+      onEdgesChange={onEdgesChange}
+      specJson={specJson}
+      controls={controls}
+      scene={scene}
+    />
+  );
+
+  const interactiveModelPreview = modelFile && (
+    <Scene gltf={gltf} onClickListeners={sceneOnClickListeners} animationsState={animations} />
   );
 
   return (
     <>
       <Nav isWeb3Enabled={web3Enabled} />
-      <div className="w-full h-full relative" ref={setRootNode}>
-        <div
-          className={clsx('absolute right-2 z-50', {
-            'top-14': splitDirection === 'horizontal',
-            'top-2': splitDirection === 'vertical',
-          })}
-        >
-          <TogglePaneButtons setSplitDirection={setSplitDirection} splitDirection={splitDirection} />
-        </div>
-        {/* @ts-ignore */}
-        <SplitPane split={splitDirection} defaultSize={800} onChange={handleSplitResized}>
-          <div className="w-full h-full">
-            {controls && scene && (
-              <FlowEditor
-                nodes={nodes}
-                onNodesChange={onNodesChange}
-                edges={edges}
-                onEdgesChange={onEdgesChange}
-                specJson={specJson}
-                scene={scene}
-                controls={controls}
-              />
-            )}
-          </div>
-          {/* <div className="row-span-1">
-            <Nav
-              contractAddress={contractAddress}
-              graphJson={graphJson}
-              modelUrl={modelUrl}
-              setModelUrl={setModelUrl}
-            />
-          </div> */}
-          <div className="w-full h-full overflow-hidden" ref={rightRef}>
-            {dimensions && (
-              <div style={{ ...dimensions }} className="absolute z-40">
-                <Scene gltf={gltf} onClickListeners={sceneOnClickListeners} animationsState={animations} />
-              </div>
-            )}
-          </div>
-        </SplitPane>
-        <GltfLoader fileUrl={modelFile?.dataUri} setGltf={setGltf} />
+      <div className="w-full h-full relative">
+        <SplitEditor left={flowEditor} right={interactiveModelPreview} />
       </div>
+      {/* @ts-ignore */}
+      <GltfLoader fileUrl={modelFile?.dataUri} setGltf={setGltf} />
     </>
   );
 }

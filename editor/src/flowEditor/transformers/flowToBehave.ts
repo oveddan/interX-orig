@@ -1,4 +1,4 @@
-import { GraphJSON, NodeJSON, NodeSpecJSON } from 'behave-graph';
+import { GraphJSON, NodeJSON, NodeSpecJSON } from '@behave-graph/core';
 import { Edge, Node } from 'reactflow';
 
 const isNullish = (value: any): value is null | undefined => value === undefined || value === null;
