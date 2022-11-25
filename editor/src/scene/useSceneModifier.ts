@@ -1,9 +1,11 @@
+import { Registry, Vec3, Vec4 } from '@behave-graph/core';
 import { ObjectMap } from '@react-three/fiber';
-import { GLTF } from 'three-stdlib';
-import { Vec3, Vec4 } from 'behave-graph';
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
-import { IScene, Properties, ResourceTypes } from '../abstractions';
+import { Event, Material, MeshBasicMaterial, Object3D, Quaternion, Vector3, Vector4 } from 'three';
+import { GLTF } from 'three-stdlib';
+
+import { ISceneWithQueries, Properties, ResourceTypes } from '../abstractions';
+import { registerSharedSceneProfiles, registerSpecificSceneProfiles } from '../hooks/profiles';
 import { GLTFJson } from './GLTFJson';
 
 function toVec3(value: Vector3): Vec3 {
@@ -59,7 +61,7 @@ function applyPropertyToModel(
   const nodeName = getResourceName({ resource, index }, properties);
   if (!nodeName) throw new Error(`could not get node at index ${index}`);
   if (resource === 'nodes') {
-    const node = gltf.nodes[nodeName];
+    const node = gltf.nodes[nodeName] as unknown as Object3D | undefined;
 
     if (!node) {
       console.error(`no node at path ${nodeName}`);
@@ -71,7 +73,7 @@ function applyPropertyToModel(
     return;
   }
   if (resource === 'materials') {
-    const node = gltf.materials[nodeName];
+    const node = gltf.materials[nodeName] as unknown as Material | undefined;
 
     if (!node) {
       console.error(`no node at path ${nodeName}`);
@@ -99,7 +101,7 @@ const getPropertyFromModel = ({ resource, index, property }: Path, gltf: GLTF & 
   if (resource === 'nodes') {
     const nodeName = getResourceName({ resource, index }, properties);
     if (!nodeName) throw new Error(`could not get node at index ${index}`);
-    const node = gltf.nodes[nodeName];
+    const node = gltf.nodes[nodeName] as unknown as Object3D | undefined;
 
     if (!node) {
       console.error(`no node at path ${nodeName}`);
@@ -151,7 +153,7 @@ function applyMaterialModifier(property: string, materialRef: Material, value: a
   }
 }
 
-function getPropertyValue(property: string, objectRef: Object3D) {
+function getPropertyValue(property: string, objectRef: Object3D<Event>) {
   switch (property) {
     case 'visible': {
       return objectRef.visible;
@@ -177,9 +179,18 @@ const extractProperties = (gltf: GLTF): Properties => {
 
   const gltfJson = gltf.parser.json as GLTFJson;
 
-  const nodeOptions = gltfJson.nodes?.map(({ name }, index) => ({ name: name || index.toString(), index }));
-  const materialOptions = gltfJson.materials?.map(({ name }, index) => ({ name: name || index.toString(), index }));
-  const animationOptions = gltf.animations?.map(({ name }, index) => ({ name: name || index.toString(), index }));
+  const nodeOptions = gltfJson.nodes?.map(({ name }, index) => ({
+    name: name || index.toString(),
+    index,
+  }));
+  const materialOptions = gltfJson.materials?.map(({ name }, index) => ({
+    name: name || index.toString(),
+    index,
+  }));
+  const animationOptions = gltf.animations?.map(({ name }, index) => ({
+    name: name || index.toString(),
+    index,
+  }));
 
   const properties: Properties = {};
 
@@ -188,11 +199,17 @@ const extractProperties = (gltf: GLTF): Properties => {
   }
 
   if (materialOptions) {
-    properties.materials = { options: materialOptions, properties: materialProperties };
+    properties.materials = {
+      options: materialOptions,
+      properties: materialProperties,
+    };
   }
 
   if (animationOptions) {
-    properties.animations = { options: animationOptions, properties: animationProperties };
+    properties.animations = {
+      options: animationOptions,
+      properties: animationProperties,
+    };
   }
 
   return properties;
@@ -285,7 +302,7 @@ const buildSceneModifier = (
 
   const getProperties = () => properties;
 
-  const scene: IScene = {
+  const scene: ISceneWithQueries = {
     getProperty,
     setProperty,
     getProperties,
@@ -299,7 +316,7 @@ const buildSceneModifier = (
 export type AnimationsState = { [key: string]: boolean };
 
 const useSceneModifier = (gltf: (GLTF & ObjectMap) | undefined) => {
-  const [scene, setScene] = useState<IScene>();
+  const [scene, setScene] = useState<ISceneWithQueries>();
 
   const [activeAnimations, setActiveAnimations] = useState<AnimationsState>({});
   const [sceneOnClickListeners, setSceneOnClickListeners] = useState<OnClickListeners>({});
@@ -328,7 +345,21 @@ const useSceneModifier = (gltf: (GLTF & ObjectMap) | undefined) => {
     }
   }, [gltf, setSceneOnClickListeners, setAnimationActive]);
 
-  return { scene, animations: activeAnimations, sceneOnClickListeners };
+  const registerProfile = useCallback(
+    (registry: Registry) => {
+      if (!scene) return;
+      registerSharedSceneProfiles(registry, scene);
+      registerSpecificSceneProfiles(registry, scene);
+    },
+    [scene]
+  );
+
+  return {
+    scene,
+    animations: activeAnimations,
+    sceneOnClickListeners,
+    registerSceneProfile: registerProfile,
+  };
 };
 
 export default useSceneModifier;

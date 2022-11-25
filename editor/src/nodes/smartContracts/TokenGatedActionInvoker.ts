@@ -1,5 +1,5 @@
-import { FlowNode, NodeDescription, Socket, Graph, Engine, Assert } from 'behave-graph';
-import { Fiber } from 'behave-graph/dist/lib/Execution/Fiber';
+import { FlowNode, NodeDescription, Socket, Graph, Engine, Assert } from '@behave-graph/core';
+import { Fiber } from '@behave-graph/core/dist/lib/Execution/Fiber';
 import { ISmartContractActions } from '../../abstractions';
 
 export const smartContractInvokedActionName = 'smartContract/invokeTokenGatedAction';

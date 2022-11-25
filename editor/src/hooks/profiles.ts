@@ -1,21 +1,24 @@
-import { Registry } from 'behave-graph';
-import { Vec2Value } from 'behave-graph/dist/lib/Profiles/Scene/Values/Vec2Value';
-import { Vec3Value } from 'behave-graph/dist/lib/Profiles/Scene/Values/Vec3Value';
-import { Vec4Value } from 'behave-graph/dist/lib/Profiles/Scene/Values/Vec4Value';
-import { ColorValue } from 'behave-graph/dist/lib/Profiles/Scene/Values/ColorValue';
-import { EulerValue } from 'behave-graph/dist/lib/Profiles/Scene/Values/EulerValue';
-import { QuatValue } from 'behave-graph/dist/lib/Profiles/Scene/Values/QuatValue';
-import { getNodeDescriptions } from 'behave-graph/dist/lib/Nodes/Registry/NodeDescription';
-import * as Vec2Nodes from 'behave-graph/dist/lib/Profiles/Scene/Values/Vec2Value';
-import * as Vec3Nodes from 'behave-graph/dist/lib/Profiles/Scene/Values/Vec3Value';
-import * as Vec4Nodes from 'behave-graph/dist/lib/Profiles/Scene/Values/Vec4Value';
-import * as ColorNodes from 'behave-graph/dist/lib/Profiles/Scene/Values/ColorNodes';
-import * as EulerNodes from 'behave-graph/dist/lib/Profiles/Scene/Values/EulerNodes';
-import * as QuatNodes from 'behave-graph/dist/lib/Profiles/Scene/Values/QuatNodes';
-import { SetSceneProperty } from 'behave-graph/dist/lib/Profiles/Scene/Actions/SetSceneProperty';
-import { GetSceneProperty } from 'behave-graph/dist/lib/Profiles/Scene/Queries/GetSceneProperty';
-import { registerSerializersForValueType } from 'behave-graph/dist/lib/Profiles/Core/registerSerializersForValueType';
-import { IScene, ISmartContractActions } from '../abstractions';
+import {
+  Registry,
+  Vec2Value,
+  Vec3Value,
+  Vec4Value,
+  ColorValue,
+  EulerValue,
+  QuatValue,
+  getNodeDescriptions,
+  Vec2Nodes,
+  Vec3Nodes,
+  Vec4Nodes,
+  ColorNodes,
+  EulerNodes,
+  QuatNodes,
+  SetSceneProperty,
+  GetSceneProperty,
+  IScene,
+} from '@behave-graph/core';
+import { registerSerializersForValueType } from '@behave-graph/core/src/Profiles/Core/registerSerializersForValueType';
+import { ISceneWithQueries, ISmartContractActions } from '../abstractions';
 import { OnSceneNodeClick } from '../nodes/scene/OnSceneNodeClick';
 import { OnSmartActionInvoked } from '../nodes/smartContracts/OnSmartActionInvoked';
 import { TokenGatedActionInvoker } from '../nodes/smartContracts/TokenGatedActionInvoker';
@@ -49,11 +52,15 @@ export function registerSharedSceneProfiles(registry: Registry, scene: IScene) {
   // variables
 
   newValueTypeNames.forEach((valueTypeName) => {
-    registerSerializersForValueType(registry, valueTypeName);
+    registerSerializersForValueType(
+      // @ts-ignore
+      registry,
+      valueTypeName
+    );
   });
 }
 
-export function registerSpecificSceneProfiles(registry: Registry, scene: IScene) {
+export function registerSpecificSceneProfiles(registry: Registry, scene: ISceneWithQueries) {
   const { nodes } = registry;
 
   // TODO: register scene node types with IScene.

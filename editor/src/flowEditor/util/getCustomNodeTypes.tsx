@@ -1,4 +1,4 @@
-import { NodeSpecJSON } from 'behave-graph';
+import { NodeSpecJSON } from '@behave-graph/core';
 import { NodeTypes } from 'reactflow';
 import { IScene } from '../../abstractions';
 import { Node } from '../components/Node';

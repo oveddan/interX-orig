@@ -1,4 +1,4 @@
-import { GraphJSON } from 'behave-graph';
+import { GraphJSON } from '@behave-graph/core';
 import { FC, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InteractiveModelPreview from '../scene/InteractiveModelPreview';

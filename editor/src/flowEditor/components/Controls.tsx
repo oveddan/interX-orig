@@ -7,33 +7,23 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LoadModal } from './LoadModal';
 import { SaveModal } from './SaveModal';
 import { Controls, ControlButton } from 'reactflow';
-import { NodeSpecJSON } from 'behave-graph';
-import { SaveAndLoadParams } from '../../hooks/useSaveAndLoad';
-
-// const ControlButton = ({ children, title, onClick }: { title: string; children: JSX.Element; onClick: () => void }) => (
-//   <button
-//     type="button"
-//     onClick={onClick}
-//     className="text-gray-700 border border-gray-700 hover:bg-gray-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-300 dark:border-gray-500 dark:text-gray-500 dark:hover:text-white dark:focus:ring-gray-800'"
-//   >
-//     {children}
-//   </button>
-// );
+import { GraphJSON } from '@behave-graph/core';
 
 const CustomControls = ({
   toggleRun,
-  specJson,
+  graphJson,
   running,
-  handleSetModelAndBehaviorGraph,
   additionalControls = null,
-  rootNode,
+  setBehaviorGraph,
+  setModelFile,
 }: {
   toggleRun: () => void;
-  specJson: NodeSpecJSON[];
   running: boolean;
   additionalControls?: JSX.Element | null;
-  rootNode: HTMLElement | null;
-} & Pick<SaveAndLoadParams, 'handleSetModelAndBehaviorGraph'>) => {
+  graphJson: GraphJSON | undefined;
+  setBehaviorGraph: (value: GraphJSON) => void;
+  setModelFile: (file: File) => void;
+}) => {
   const [loadModalOpen, setLoadModalOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
@@ -59,19 +49,17 @@ const CustomControls = ({
         </ControlButton>
         {additionalControls}
       </Controls>
-      {rootNode && (
-        <>
-          <LoadModal
-            open={loadModalOpen}
-            onClose={() => setLoadModalOpen(false)}
-            handleSetModelAndBehaviorGraph={handleSetModelAndBehaviorGraph}
-            container={rootNode}
-          />
-          <SaveModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} specJson={specJson} />
-          <HelpModal open={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
-          <ClearModal open={clearModalOpen} onClose={() => setClearModalOpen(false)} />
-        </>
-      )}
+      <>
+        <LoadModal
+          open={loadModalOpen}
+          onClose={() => setLoadModalOpen(false)}
+          setBehaviorGraph={setBehaviorGraph}
+          setModelFile={setModelFile}
+        />
+        <SaveModal open={saveModalOpen} onClose={() => setSaveModalOpen(false)} graphJson={graphJson} />
+        <HelpModal open={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
+        <ClearModal open={clearModalOpen} onClose={() => setClearModalOpen(false)} />
+      </>
     </>
   );
 };

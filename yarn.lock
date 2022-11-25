@@ -1065,6 +1065,11 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
+"@behave-graph/core@^0.9.11":
+  version "0.9.11"
+  resolved "https://registry.yarnpkg.com/@behave-graph/core/-/core-0.9.11.tgz#5eea457ba43a391ff0b261a4e2aeb522cd3e4f0f"
+  integrity sha512-6jal+yvJOVAo4/+RVcX5cJi1PHgQmeSP/RFnOmdLVWfaWPPLUwQ/bgH4GKrU0RIzK6xwCEwYp+RQnWMkmBDk3g==
+
 "@chevrotain/cst-dts-gen@10.4.1":
   version "10.4.1"
   resolved "https://registry.yarnpkg.com/@chevrotain/cst-dts-gen/-/cst-dts-gen-10.4.1.tgz#b5b5656d6121dd6cf21675ffc19641057c005c44"

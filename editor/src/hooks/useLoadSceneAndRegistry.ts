@@ -1,6 +1,6 @@
 import { ObjectMap } from '@react-three/fiber';
 import { GLTF } from 'three-stdlib';
-import useSceneModifier, { OnClickListener, OnClickListeners } from '../scene/useSceneModifier';
+import useSceneModifier from '../scene/useSceneModifier';
 import { useRegistry } from './behaviorFlow';
 import { ISmartContractActions } from '../abstractions';
 

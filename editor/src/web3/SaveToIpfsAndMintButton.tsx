@@ -1,4 +1,4 @@
-import { GraphJSON } from 'behave-graph';
+import { GraphJSON } from '@behave-graph/core';
 import { useState } from 'react';
 import SaveToIpfsButton from './SaveToIpfsButton';
 import MintToChainButton from './MintToChainButton';

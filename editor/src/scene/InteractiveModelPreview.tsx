@@ -1,6 +1,5 @@
-import { ObjectMap } from '@react-three/fiber';
 import { useEffect, useState } from 'react';
-import { GraphJSON } from 'behave-graph';
+import { GraphJSON } from '@behave-graph/core';
 import { useGLTF } from '@react-three/drei';
 import useLoadSceneAndRegistry from '../hooks/useLoadSceneAndRegistry';
 import useMockSmartContractActions from '../onChainWorld/useMockSmartContractActions';

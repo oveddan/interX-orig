@@ -1,11 +1,10 @@
-import { Graph, Socket, Engine, Assert } from 'behave-graph';
-import { EventNode } from 'behave-graph/dist/lib/Nodes/EventNode';
-import { NodeDescription } from 'behave-graph/dist/lib/Nodes/Registry/NodeDescription';
-import { IScene } from '../../abstractions';
+import { Graph, Socket, Engine, Assert } from '@behave-graph/core';
+import { EventNode, NodeDescription } from '@behave-graph/core';
+import { ISceneWithQueries } from '../../abstractions';
 
 // very 3D specific.
 export class OnSceneNodeClick extends EventNode {
-  public static Description = (scene: IScene) =>
+  public static Description = (scene: ISceneWithQueries) =>
     new NodeDescription(
       'scene/nodeClick',
       'Event',
@@ -13,7 +12,7 @@ export class OnSceneNodeClick extends EventNode {
       (description, graph) => new OnSceneNodeClick(description, graph, scene)
     );
 
-  constructor(description: NodeDescription, graph: Graph, private readonly scene: IScene) {
+  constructor(description: NodeDescription, graph: Graph, private readonly scene: ISceneWithQueries) {
     super(
       description,
       graph,

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { GraphJSON } from 'behave-graph';
+import { GraphJSON } from '@behave-graph/core';
 import { ControlButton } from 'reactflow';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { PublishModal } from './PublishModal';
