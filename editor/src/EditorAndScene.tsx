@@ -1,6 +1,5 @@
-import { Suspense } from 'react';
+import { Suspense, useCallback } from 'react';
 import Scene from './scene/Scene';
-// import rawGraphJSON from './exampleGraphs/TokenGatedClick.json';
 import '@rainbow-me/rainbowkit/styles.css';
 import useMockSmartContractActions from './onChainWorld/useMockSmartContractActions';
 import './styles/resizer.css';
@@ -16,6 +15,8 @@ import useSceneModifier from './scene/useSceneModifier';
 import Flow from './flowEditor/FlowEditorApp';
 import SplitEditor from './SplitEditor';
 import { examplePairs } from './flowEditor/components/LoadModal';
+import { Registry } from '@behave-graph/core';
+import useRegisterSmartContractActions from './onChainWorld/useRegisterSmartContractActions';
 
 const [initialModelFile, initialBehaviorGraph] = examplePairs[0];
 
@@ -24,14 +25,24 @@ const initialBehaviorGraphUrl = exampleBehaveGraphFileUrl(initialBehaviorGraph);
 
 function EditorAndScene({ web3Enabled }: { web3Enabled?: boolean }) {
   const smartContractActions = useMockSmartContractActions();
+  const registerSmartContractActions = useRegisterSmartContractActions(smartContractActions);
+
   const { modelFile, setModelFile, gltf } = useSetAndLoadModelFile({
     initialFileUrl: initialModelFileUrl,
   });
 
   const { scene, animations, sceneOnClickListeners, registerSceneProfile } = useSceneModifier(gltf);
 
+  const registerProfiles = useCallback(
+    (registry: Registry) => {
+      registerSmartContractActions(registry);
+      registerSceneProfile(registry);
+    },
+    [registerSceneProfile, smartContractActions]
+  );
+
   const { registry, lifecyleEmitter } = useRegistry({
-    registerProfiles: registerSceneProfile,
+    registerProfiles,
   });
 
   const specJson = useNodeSpecJson(registry);
