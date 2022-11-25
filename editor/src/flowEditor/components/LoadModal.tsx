@@ -18,6 +18,7 @@ const modelFiles = {
 const graphFiles = {
   clickButtonToAnimate: 'ClickButtonToAnimate.json',
   spinningSuzanne: 'SpinningSuzanne.json',
+  tokenGatedClick: 'TokenGatedClick.json',
   delay: 'Delay.json',
   flipFlop: 'FlipFlop.json',
   forLoop: 'FoorLoop.json',
@@ -27,6 +28,7 @@ const graphFiles = {
 export const examplePairs: [string, string][] = [
   [modelFiles.pressButtonToStartElevator, graphFiles.clickButtonToAnimate],
   [modelFiles.suzanne, graphFiles.spinningSuzanne],
+  [modelFiles.suzanne, graphFiles.tokenGatedClick],
   // [graphFiles.helloWorld],
   // [graphFiles.delay],
   // [graphFiles.flipFlop],

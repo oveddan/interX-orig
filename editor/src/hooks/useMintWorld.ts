@@ -8,7 +8,6 @@ import {
   togenGatedAddressParamName,
   tokenGatedParamName,
 } from '../nodes/smartContracts/TokenGatedActionInvoker';
-import { useWhyDidYouUpdate } from 'use-why-did-you-update';
 
 type TokenizedAction = {
   nodeType: number;
@@ -110,17 +109,6 @@ const useMintWorld = ({
   const mintedTokenId = useWaitForMintedTokenWithContentUri({
     contractAddress,
     cid: worldCid,
-  });
-
-  useWhyDidYouUpdate('mintWorld', {
-    data,
-    isLoading,
-    isSuccess,
-    write,
-    ...config,
-    error,
-    isError,
-    args,
   });
 
   return { mint: write, isSuccess, isLoading, isError, error, mintedTokenId };

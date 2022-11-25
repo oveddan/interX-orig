@@ -1,4 +1,3 @@
-import { ObjectMap } from '@react-three/fiber';
 import { useEffect, useState } from 'react';
 import { GraphJSON } from '@behave-graph/core';
 import { useGLTF } from '@react-three/drei';

@@ -1,6 +1,5 @@
 import { GraphJSON } from '@behave-graph/core';
-import { useCallback, useMemo, useState } from 'react';
-import { examplePairs } from '../flowEditor/components/LoadModal';
+import { useCallback, useState } from 'react';
 import { suspend } from 'suspend-react';
 import { useGLTF } from '@react-three/drei';
 
